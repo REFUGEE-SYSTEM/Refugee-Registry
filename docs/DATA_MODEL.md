@@ -1,48 +1,31 @@
-# Refugee Registry — Data Model (Uganda Mandatory Attributes)
+# Refugee Registry — Data Model (Uganda Category-per-Tab Layout)
 
-Generated from `refugee-extension/src/openg2p_registry_refugee_extension/register_domain/models/` and `meta_data/register-metadata/g2p_register_sections.sql`, aligned to the **Mandatory** attributes in `Uganda_Refugee_Data_Attributes.xlsx` (55 attributes implemented; 3 biometrics `C01, C02, C05` out of scope; Conditional/Recommended/Optional attributes omitted from forms while preserving legacy DB columns).
+Generated from `refugee-extension/src/openg2p_registry_refugee_extension/register_domain/models/` and `meta_data/register-metadata/`. Scope: 55 non-biometric `Mandatory` attributes from `Uganda_Refugee_Data_Attributes.xlsx` (`C01`, `C02`, `C05` biometrics out of scope). Legacy DB columns and non-mandatory sub-registers (`DisplacementHistory`, `Relative`, `Address`, `EducationRecord`, `OccupationSkill`) are preserved in PostgreSQL and hidden in the UI.
 
-## Registers Overview
+## Household Register (`g2p_register_households`, `a0000000-0000-0000-0000-000000000001`)
 
-| Register | Purpose | Parent | ID Prefix | UI Status | Fixed UUID |
-|---|---|---|---|---|---|
-| `Household` | `REGISTER` | `NULL` | `HH-` | Active | `a0000000-0000-0000-0000-000000000001` |
-| `Refugee` | `REGISTER` | `NULL` | `RF-` | Active | `a0000000-0000-0000-0000-000000000002` |
-| `IdentityDocument` | `TABLE` | `Refugee` | — | Active | `a0000000-0000-0000-0000-000000000003` |
-| `SpecificNeeds` | `TABLE` | `Refugee` | — | Active | `a0000000-0000-0000-0000-000000000005` |
-| `DisplacementHistory` | `TABLE` | `Refugee` | — | Hidden (`is_active=FALSE`) | `a0000000-0000-0000-0000-000000000004` |
-| `Relative` | `TABLE` | `Refugee` | — | Hidden (`is_active=FALSE`) | `a0000000-0000-0000-0000-000000000006` |
-| `Address` | `TABLE` | `Refugee` | — | Hidden (`is_active=FALSE`) | `a0000000-0000-0000-0000-000000000007` |
-| `EducationRecord` | `TABLE` | `Refugee` | — | Hidden (`is_active=FALSE`) | `a0000000-0000-0000-0000-000000000008` |
-| `OccupationSkill` | `TABLE` | `Refugee` | — | Hidden (`is_active=FALSE`) | `a0000000-0000-0000-0000-000000000009` |
+| Order | Tab (`tab_id`) | Label | Section(s) | Attribute IDs & Fields |
+|---|---|---|---|---|
+| 1 | `household_overview_tab` | Household Composition | `household_header_section_01`, `household_info_section_01` | `F01` `head_of_household_id`, `F03` `group_size` (RO), `F04` `dependency_ratio` (RO), `F05` `is_female_headed` (RO), `F06` `is_child_headed` (RO) |
+| 2 | `household_case_registration_tab` | Case & Registration | `household_case_registration_section_01` | `A01` `functional_record_id` (RO), `A02` `registration_date`, `A04` `entry_point`, `A05` `registration_site`, `A06` `registering_officer_id` (RO) |
+| 3 | `household_location_tab` | Location & Settlement | `household_location_section_02` | `G01` `host_district`, `G02` `settlement_location`, `G03` `zone_cluster`, `G04` `village_block`, core `geo_hierarchy` |
+| 4 | `household_livelihoods_tab` | Livelihoods | `household_livelihoods_section_01` | `L01` `main_income_source`, `L02` `working_age_earners` |
+| 5 | `household_targeting_tab` | Targeting & Eligibility | `household_targeting_section_01` | `M01` `assistance_category`, `M02` `vulnerability_score` (RO), `M03` `is_new_arrival` + `new_arrival_end_date`, `M04` `programmes_enrolled`, `M05` `enrolment_date` + `exit_date` + `exit_reason` |
+| 6 | `household_payment_tab` | Payment & Delivery | `household_payment_section_01` | `N01` `delivery_modality` + `delivery_mechanism`, `N06` `primary_recipient_id`, `N08` `food_distribution_point`, `N09` `entitlement_amount` (RO) + `entitlement_currency` (RO) |
+| 7 | `household_distribution_tab` | Distribution & Transactions | `household_distribution_section_01` | `O01` `payment_cycle`, `O03` `payment_status`, `O04` `transaction_reference` + `transaction_date` |
+| 8 | `household_lifecycle_tab` | Record Lifecycle | `household_lifecycle_section_01` | `Q01` `lifecycle_status`, `Q04` `last_updated_at` (RO) + `last_updated_by` (RO) |
 
-## 1. Household (`g2p_register_households`)
-- **Tab**: `household_overview_tab` ("Household Composition")
-- **Sections**: `household_header_section_01`, `household_info_section_01`, `household_location_section_02`
-- **Uganda Mandatory Fields**:
-  - `functional_record_id` (`A01`, `HH-...`), `registration_date` (`A02`), `entry_point` (`A04`, DS `ENTRY_POINT`), `registration_site` (`A05`, DS `REGISTRATION_SITE`), `registering_officer_id` (`A06`)
-  - `head_of_household_id` (`F01`), `group_size` (`F03`), `dependency_ratio` (`F04`), `is_female_headed` (`F05`), `is_child_headed` (`F06`)
-  - `host_district` (`G01`, DS `HOST_DISTRICT`), `settlement_location` (`G02`, DS `SETTLEMENT_LOCATION`), `zone_cluster` (`G03`, DS `ZONE_CLUSTER`), `village_block` (`G04`, DS `VILLAGE_BLOCK`)
-  - `main_income_source` (`L01`, DS `INCOME_SOURCE`), `working_age_earners` (`L02`)
-  - `assistance_category` (`M01`, DS `ASSISTANCE_CATEGORY`), `vulnerability_score` (`M02`, 0–100), `is_new_arrival` (`M03`), `new_arrival_end_date` (`M03`), `programmes_enrolled` (`M04`, DS `PROGRAMME`), `enrolment_date` / `exit_date` / `exit_reason` (`M05`, DS `EXIT_REASON`)
-  - `delivery_modality` (`N01`, DS `DELIVERY_MODALITY`), `delivery_mechanism` (`N01`, DS `DELIVERY_MECHANISM`), `primary_recipient_id` (`N06`), `food_distribution_point` (`N08`, DS `FOOD_DISTRIBUTION_POINT`), `entitlement_amount` & `entitlement_currency` (`N09`, `UGX`/`USD`)
-  - `payment_cycle` (`O01`, `YYYY-MM`), `payment_status` (`O03`, DS `PAYMENT_STATUS`), `transaction_reference` & `transaction_date` (`O04`)
-  - `lifecycle_status` (`Q01`, DS `REFUGEE_RECORD_STATUS`), `last_updated_at` & `last_updated_by` (`Q04`)
+## Refugee Register (`g2p_register_refugees`, `a0000000-0000-0000-0000-000000000002`)
 
-## 2. Refugee (`g2p_register_refugees`)
-- **Active Tabs**: `refugee_overview_tab` ("Personal Identity"), `refugee_household_link_tab`, `refugee_documents_tab`, `refugee_specific_needs_tab`
-- **Uganda Mandatory Fields**:
-  - `functional_record_id` (`D01`, `RF-...`), `link_internal_record_id` (Household lookup)
-  - `last_name` (`B01`, uppercased), `given_name` (`B02`), `gender` (`B04`, DS `REFUGEE_GENDER`: `MALE`, `FEMALE`), `birth_date` (`B05`), `is_birth_date_estimated` (`B06`), `place_of_birth` (`B07`), `country_of_origin` (`B08`, DS `COUNTRY_OF_ORIGIN`), `nationality` (`B09`, DS `NATIONALITY`), `marital_status` (`B10`, DS `REFUGEE_MARITAL_STATUS`), `languages_known` (`B11`, DS `LANGUAGE`), `arrival_date` (`A03`)
-  - `legal_status` (`E01`, DS `LEGAL_STATUS`), `rsd_application_date` (`E03`), `security_screening_status` (`E07`, DS `SECURITY_SCREENING`)
-  - `relationship_to_group` (`F02`, DS `REFUGEE_RELATIONSHIP_TO_GROUP`), `presence_status` (`F07`, DS `PRESENCE_STATUS`)
-  - `unaccompanied_separated_status` (`I02`, DS `UNACCOMPANIED_CHILD`)
-  - Washington Group Short Set (`J01` x6, DS `WASHINGTON_GROUP_ANSWER`): `wg_seeing`, `wg_hearing`, `wg_walking`, `wg_remembering`, `wg_self_care`, `wg_communicating`; `has_serious_medical_condition` (`J02`)
-  - `programmes_enrolled` (`M04`), `enrolment_date` / `exit_date` / `exit_reason` (`M05`)
-  - `auth_result` (`O02`, DS `AUTH_RESULT`)
-  - `informed_consent_given` & `informed_consent_date` (`P01`), `partner_data_sharing_consent` (`P02`, DS `PARTNER_CONSENT`)
-  - `lifecycle_status` (`Q01`, DS `REFUGEE_RECORD_STATUS`), `duplicate_check_result` (`Q03`, DS `DUPLICATE_CHECK`), `last_updated_at` & `last_updated_by` (`Q04`)
-
-## 3. Active Sub-Register Tables (`master_register_id = Refugee`)
-- **IdentityDocument (`g2p_register_identity_documents`)**: `document_type` (DS `IDENTITY_DOCUMENT_TYPE`), `document_number` (`D01`), `issue_date`, `expiry_date`.
-- **SpecificNeeds (`g2p_register_specific_needs`)**: `need_category` (`I01`, DS `SPECIFIC_NEED_CATEGORY` — 11 UNHCR categories), `date_identified`, `notes`.
+| Order | Tab (`tab_id`) | Label | Section(s) | Attribute IDs & Fields |
+|---|---|---|---|---|
+| 1 | `refugee_overview_tab` | Personal Identity | `refugee_header_section_01`, `refugee_personal_info_section_01` | `B01` `last_name`, `B02` `given_name`, `B04` `gender`, `B05` `birth_date`, `B06` `is_birth_date_estimated`, `B07` `place_of_birth`, `B08` `country_of_origin`, `B09` `nationality`, `B10` `marital_status`, `B11` `languages_known`, `A03` `arrival_date` |
+| 2 | `refugee_documents_tab` | Identity Documents | `refugee_identity_document_section_01` (`IdentityDocument`) | `D01` `document_type`, `document_number`, `issue_date`, `expiry_date` |
+| 3 | `refugee_displacement_tab` | Legal Status & RSD | `refugee_legal_status_section_01` | `E01` `legal_status`, `E03` `rsd_application_date`, `E07` `security_screening_status` (RO) |
+| 4 | `refugee_household_link_tab` | Household Relationship | `refugee_household_lookup_section_01`, `refugee_household_rel_section_01` | `link_internal_record_id`, `F02` `relationship_to_group`, `F07` `presence_status` |
+| 5 | `refugee_specific_needs_tab` | Specific Needs & Protection | `refugee_specific_needs_section_01` (`SpecificNeeds`), `refugee_protection_uasc_section_01` | `I01` `need_category` + `date_identified` + `notes`, `I02` `unaccompanied_separated_status` |
+| 6 | `refugee_health_disability_tab` | Health & Disability | `refugee_health_disability_section_01` | `J01` `wg_seeing`, `wg_hearing`, `wg_walking`, `wg_remembering`, `wg_self_care`, `wg_communicating`; `J02` `has_serious_medical_condition` |
+| 7 | `refugee_targeting_tab` | Targeting & Eligibility | `refugee_targeting_section_01` | `M04` `programmes_enrolled`, `M05` `enrolment_date` + `exit_date` + `exit_reason` |
+| 8 | `refugee_distribution_auth_tab` | Distribution (Authentication) | `refugee_distribution_auth_section_01` | `O02` `auth_result` |
+| 9 | `refugee_consent_tab` | Consent & Data Protection | `refugee_consent_section_01` | `P01` `informed_consent_given` + `informed_consent_date`, `P02` `partner_data_sharing_consent` |
+| 10 | `refugee_lifecycle_tab` | Record Lifecycle | `refugee_lifecycle_section_01` | `Q01` `lifecycle_status`, `Q03` `duplicate_check_result`, `Q04` `last_updated_at` (RO) + `last_updated_by` (RO) |
