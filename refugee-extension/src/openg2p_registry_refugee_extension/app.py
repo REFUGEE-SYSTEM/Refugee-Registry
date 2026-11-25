@@ -7,7 +7,10 @@ from .config import Settings
 _config = Settings.get_config()
 
 from openg2p_fastapi_common.app import Initializer as BaseInitializer
+from openg2p_fastapi_common.context import dbengine
 from openg2p_registry_core.app import Initializer as CoreInitializer
+from sqlalchemy import text
+from sqlalchemy.dialects import postgresql
 
 from .register_domain.models import (
     G2PIntakeFormAddress,
@@ -51,6 +54,45 @@ from .register_domain.services import (
 )
 
 _logger = logging.getLogger(_config.logging_default_logger_name)
+
+
+async def add_missing_columns(model) -> list[str]:
+    """Add the model's columns that its existing table lacks; return their names."""
+    table = model.__table__
+    dialect = postgresql.dialect()
+    async with dbengine.get().begin() as conn:
+        existing = set(
+            (
+                await conn.execute(
+                    text(
+                        "SELECT column_name FROM information_schema.columns "
+                        "WHERE table_schema = current_schema() AND table_name = :name"
+                    ),
+                    {"name": table.name},
+                )
+            ).scalars()
+        )
+        if not existing:
+            return []
+        added = []
+        for column in table.columns:
+            if column.name in existing:
+                continue
+            ddl = (
+                f'ALTER TABLE "{table.name}" ADD COLUMN IF NOT EXISTS "{column.name}" '
+                + column.type.compile(dialect=dialect)
+            )
+            default = column.server_default
+            if default is not None:
+                value = getattr(default.arg, "text", default.arg)
+                ddl += f" DEFAULT {value}"
+                if not column.nullable:
+                    ddl += " NOT NULL"
+            await conn.execute(text(ddl))
+            added.append(column.name)
+    if added:
+        _logger.info("Added columns to %s: %s", table.name, added)
+    return added
 
 
 class Initializer(BaseInitializer):
@@ -102,5 +144,6 @@ class Initializer(BaseInitializer):
                 G2PIntakeFormOccupationSkill,
             ):
                 await model.create_migrate()
+                await add_missing_columns(model)
 
         asyncio.run(migrate())

@@ -1,20 +1,16 @@
 #!/usr/bin/env python3
-"""Idempotent demo-data loader for Refugee Registry.
+"""Idempotent Uganda-context demo-data loader for Refugee Registry.
 
 Reads geography from the running Master Data Service via mds_client (never its DB),
-inspects target columns from information_schema, and inserts 8 households,
-25 refugees, and sub-register rows tagged with created_by='demo-seeder' and
-record_status_reason='DEMO'.
+inspects target columns from information_schema, and upserts 8 households (HH-DEMO-0001..0008),
+25 refugees (RF-DEMO-0001..0025), and IdentityDocument/SpecificNeeds rows tagged with
+created_by='demo-seeder' and record_status_reason='DEMO'.
 """
 
 from __future__ import annotations
 
 import os
-import sys
 import uuid
-from datetime import date
-from pathlib import Path
-
 import psycopg2
 from psycopg2.extras import Json
 
@@ -41,7 +37,7 @@ def _table_columns(cur, table: str) -> set[str]:
     return {r[0] for r in cur.fetchall()}
 
 
-def _insert_row(cur, table: str, cols_cache: dict[str, set[str]], row: dict) -> None:
+def _upsert_row(cur, table: str, cols_cache: dict[str, set[str]], row: dict) -> None:
     if table not in cols_cache:
         cols_cache[table] = _table_columns(cur, table)
     valid = cols_cache[table]
@@ -50,9 +46,10 @@ def _insert_row(cur, table: str, cols_cache: dict[str, set[str]], row: dict) -> 
     vals = [Json(v) if isinstance(v, (dict, list)) else v for v in filtered.values()]
     col_sql = ", ".join(f'"{c}"' for c in cols)
     ph_sql = ", ".join(["%s"] * len(cols))
+    upd_sql = ", ".join(f'"{c}" = EXCLUDED."{c}"' for c in cols if c != "internal_record_id")
     sql = (
         f'INSERT INTO "{table}" ({col_sql}) VALUES ({ph_sql}) '
-        f'ON CONFLICT ("internal_record_id") DO NOTHING'
+        f'ON CONFLICT ("internal_record_id") DO UPDATE SET {upd_sql}'
     )
     cur.execute(sql, vals)
 
@@ -68,7 +65,6 @@ def _fetch_geo_units() -> list[tuple[str, dict]]:
     level_id = lowest.get("level_id") or lowest.get("id") or lowest.get("level_mnemonic")
     units = mds.geo_units(level=level_id)
     if not units and len(levels) > 1:
-        # Fallback to parent level if lowest has no units
         parent_id = levels[-2].get("level_id") or levels[-2].get("id")
         units = mds.geo_units(level=parent_id)
     if not units:
@@ -85,52 +81,53 @@ def _fetch_geo_units() -> list[tuple[str, dict]]:
     return result
 
 
+# (func_id, reg_date, entry_pt, reg_site, officer, district, settlement, zone, village,
+#  income, earners, assist_cat, vuln, new_arr, new_end, progs, mod, mech, fdp, amt, cycle, pay_st, tx_ref, female_head, child_head)
 HOUSEHOLDS = [
-    ("HH-DEMO-0001", "REFUGEE", "SSD", "2024-03-15", "2024-04-02", "Gambella Camp Zone A, Plot 12", "+251911000101", True),
-    ("HH-DEMO-0002", "ASYLUM_SEEKER", "ERI", "2025-01-10", "2025-01-22", "Addis Ababa Urban, Bole Subcity", "+251911000102", True),
-    ("HH-DEMO-0003", "REFUGEE", "SOM", "2023-08-20", "2023-09-05", "Dollo Ado Camp, Block 4", "+251911000103", False),
-    ("HH-DEMO-0004", "REFUGEE", "SDN", "2024-11-01", "2024-11-18", "Assosa Camp, Sector 2", "+251911000104", True),
-    ("HH-DEMO-0005", "INTERNALLY_DISPLACED", "ETH", "2025-02-14", "2025-02-28", "Mekelle IDP Site, Shelter 9", "+251911000105", True),
-    ("HH-DEMO-0006", "STATELESS", "SYR", "2024-06-05", "2024-06-19", "Addis Ababa Urban, Kirkos", "+251911000106", False),
-    ("HH-DEMO-0007", "RETURNEE", "ETH", "2025-03-01", "2025-03-12", "Jijiga Reception Center", "+251911000107", True),
-    ("HH-DEMO-0008", "REFUGEE", "YEM", "2024-09-12", "2024-09-25", "Addis Ababa Urban, Yeka", "+251911000108", True),
+    ("HH-DEMO-0001", "2024-04-02", "ELEGU", "BIDIBIDI_RECEPTION", "OPM-OFF-014", "YUMBE", "BIDIBIDI", "ZONE_1", "BLOCK_A", "FARMING", 1, "NEW_ARRIVAL_FULL", 62, True, "2025-04-02", ["WFP_GFA", "OPM_NFI"], "IN_KIND_FOOD", "IN_KIND_FOOD", "BIDIBIDI_FDP_1", 180000.0, "2026-11", "COLLECTED", "TX-UG-202611-001", False, False),
+    ("HH-DEMO-0002", "2025-01-22", "BUNAGANA", "NAKIVALE_RECEPTION", "OPM-OFF-021", "ISINGIRO", "NAKIVALE", "BASE_CAMP", "VILLAGE_1", "CASUAL_LABOUR", 1, "TARGETED_CASH", 74, True, "2026-01-22", ["UNHCR_CBI", "WFP_GFA"], "CASH", "MOBILE_MONEY", "NAKIVALE_FDP_BASE", 240000.0, "2026-11", "CREDITED", "TX-UG-202611-002", True, False),
+    ("HH-DEMO-0003", "2023-09-05", "MPONDWE", "KYANGWALI_RECEPTION", "OPM-OFF-008", "KIKUUBE", "KYANGWALI", "ZONE_2", "BLOCK_B", "BUSINESS", 2, "TARGETED_FOOD", 48, False, None, ["WFP_GFA"], "IN_KIND_FOOD", "IN_KIND_FOOD", "KYANGWALI_FDP_1", 150000.0, "2026-11", "COLLECTED", "TX-UG-202611-003", False, False),
+    ("HH-DEMO-0004", "2024-11-18", "CYANIKA", "NAKIVALE_RECEPTION", "OPM-OFF-022", "ISINGIRO", "NAKIVALE", "RUBONDO", "VILLAGE_2", "AID_ONLY", 0, "EXTREMELY_VULNERABLE", 88, True, "2025-11-18", ["UNHCR_CBI", "PROTECTION_ASSISTANCE"], "CASH", "AGENCY_BANKING", "NAKIVALE_FDP_BASE", 320000.0, "2026-11", "SENT", "TX-UG-202611-004", True, False),
+    ("HH-DEMO-0005", "2025-02-28", "KAMPALA_DESK", "KAMPALA_OLD_KAMPALA", "OPM-OFF-003", "KAMPALA", "KAMPALA_URBAN", "URBAN_CENTRAL", "CLUSTER_1", "SALARY", 1, "SELF_RELIANT", 25, False, None, ["HEALTH_REFERRAL"], "CASH", "MOBILE_MONEY", "KAMPALA_CASH_POINT", 0.0, "2026-11", "NOT_COLLECTED", "TX-UG-202611-005", False, False),
+    ("HH-DEMO-0006", "2024-06-19", "ORABA", "BIDIBIDI_RECEPTION", "OPM-OFF-015", "YUMBE", "BIDIBIDI", "ZONE_3", "BLOCK_C", "FARMING", 1, "TARGETED_CASH", 68, False, None, ["WFP_GFA", "EDUCATION_SUPPORT"], "MIXED", "MOBILE_MONEY", "BIDIBIDI_FDP_2", 210000.0, "2026-11", "COLLECTED", "TX-UG-202611-006", False, False),
+    ("HH-DEMO-0007", "2025-03-12", "ELEGU", "ADJUMANI_RECEPTION", "OPM-OFF-031", "ADJUMANI", "ADJUMANI", "ZONE_4", "CLUSTER_2", "NONE", 0, "EXTREMELY_VULNERABLE", 92, True, "2026-03-12", ["WFP_GFA", "PROTECTION_ASSISTANCE"], "VOUCHER", "CASH_IN_HAND", "BIDIBIDI_FDP_1", 260000.0, "2026-11", "CREDITED", "TX-UG-202611-007", False, True),
+    ("HH-DEMO-0008", "2024-09-25", "KAMPALA_DESK", "KAMPALA_OLD_KAMPALA", "OPM-OFF-005", "KAMPALA", "KAMPALA_URBAN", "URBAN_CENTRAL", "VILLAGE_3", "REMITTANCES", 1, "TRANSITIONAL", 42, False, None, ["UNHCR_CBI"], "CASH", "MOBILE_MONEY", "KAMPALA_CASH_POINT", 160000.0, "2026-11", "COLLECTED", "TX-UG-202611-008", True, False),
 ]
 
-# (hh_idx, func_id, first, last, gender, dob, rel, marital, origin, edu, occ, religion, langs, pob)
+# (hh_idx, func_id, given, surname, gender, dob, dob_est, pob, origin, nat, marital, langs, arrival, rel, presence, legal, rsd_dt, screen, uasc, med, wg_see, wg_walk)
 REFUGEES = [
-    # HH 1 (SSD, 4)
-    (0, "RF-DEMO-0001", "Deng", "Garang", "MALE", "1984-05-12", "SELF", "MARRIED", "SSD", "SECONDARY", "Farmer", "CHRISTIANITY", ["EN", "AR"], "Juba"),
-    (0, "RF-DEMO-0002", "Nyibol", "Garang", "FEMALE", "1988-09-20", "SPOUSE", "MARRIED", "SSD", "PRIMARY", "Trader", "CHRISTIANITY", ["EN"], "Bor"),
-    (0, "RF-DEMO-0003", "Akech", "Garang", "FEMALE", "2012-03-11", "CHILD", "SINGLE", "SSD", "PRIMARY", "Student", "CHRISTIANITY", ["EN"], "Juba"),
-    (0, "RF-DEMO-0004", "Bol", "Garang", "MALE", "2015-07-04", "CHILD", "SINGLE", "SSD", "NEVER_ATTEND", None, "CHRISTIANITY", ["EN"], "Juba"),
-    # HH 2 (ERI, 3)
-    (1, "RF-DEMO-0005", "Tesfay", "Berhe", "MALE", "1990-02-18", "SELF", "MARRIED", "ERI", "TERTIARY", "Electrician", "CHRISTIANITY", ["TI", "EN"], "Asmara"),
-    (1, "RF-DEMO-0006", "Selam", "Berhe", "FEMALE", "1993-11-05", "SPOUSE", "MARRIED", "ERI", "SECONDARY", "Tailor", "CHRISTIANITY", ["TI", "AM"], "Keren"),
-    (1, "RF-DEMO-0007", "Robel", "Berhe", "MALE", "2018-01-22", "CHILD", "SINGLE", "ERI", "NEVER_ATTEND", None, "CHRISTIANITY", ["TI"], "Asmara"),
-    # HH 3 (SOM, 4)
-    (2, "RF-DEMO-0008", "Abdi", "Hassan", "MALE", "1979-08-30", "SELF", "MARRIED", "SOM", "BASIC", "Pastoralist", "ISLAM", ["SO", "AR"], "Baidoa"),
-    (2, "RF-DEMO-0009", "Halima", "Hassan", "FEMALE", "1983-04-14", "SPOUSE", "MARRIED", "SOM", "NON_FORMAL", "Weaver", "ISLAM", ["SO"], "Baidoa"),
-    (2, "RF-DEMO-0010", "Fartun", "Hassan", "FEMALE", "2010-12-01", "CHILD", "SINGLE", "SOM", "PRIMARY", "Student", "ISLAM", ["SO"], "Baidoa"),
-    (2, "RF-DEMO-0011", "Yusuf", "Hassan", "MALE", "2014-06-19", "CHILD", "SINGLE", "SOM", "PRIMARY", "Student", "ISLAM", ["SO"], "Dollo"),
-    # HH 4 (SDN, 3)
-    (3, "RF-DEMO-0012", "Omer", "Al-Amin", "MALE", "1986-07-07", "SELF", "MARRIED", "SDN", "HIGHER_EDUCATION", "Teacher", "ISLAM", ["APD", "AR", "EN"], "Khartoum"),
-    (3, "RF-DEMO-0013", "Muna", "Al-Amin", "FEMALE", "1991-03-25", "SPOUSE", "MARRIED", "SDN", "TERTIARY", "Nurse", "ISLAM", ["APD", "EN"], "Omdurman"),
-    (3, "RF-DEMO-0014", "Tariq", "Al-Amin", "MALE", "2017-10-10", "CHILD", "SINGLE", "SDN", "NEVER_ATTEND", None, "ISLAM", ["APD"], "Khartoum"),
-    # HH 5 (ETH, 3)
-    (4, "RF-DEMO-0015", "Dawit", "Gebre", "MALE", "1981-01-15", "SELF", "WIDOWED", "ETH", "SECONDARY", "Mason", "CHRISTIANITY", ["TI", "AM"], "Adigrat"),
-    (4, "RF-DEMO-0016", "Hana", "Gebre", "FEMALE", "2011-05-09", "CHILD", "SINGLE", "ETH", "PRIMARY", "Student", "CHRISTIANITY", ["TI"], "Adigrat"),
-    (4, "RF-DEMO-0017", "Yonas", "Gebre", "OTHERS", "2004-09-12", "SIBLING", "SINGLE", "ETH", "SECONDARY", "Mechanic", "NONE", ["TI", "EN"], "Adigrat"),
-    # HH 6 (SYR, 3)
-    (5, "RF-DEMO-0018", "Khaled", "Mansour", "MALE", "1975-11-28", "SELF", "MARRIED", "SYR", "TERTIARY", "Carpenter", "ISLAM", ["AR", "EN"], "Aleppo"),
-    (5, "RF-DEMO-0019", "Layla", "Mansour", "FEMALE", "1980-06-03", "SPOUSE", "MARRIED", "SYR", "SECONDARY", "Baker", "ISLAM", ["AR"], "Aleppo"),
-    (5, "RF-DEMO-0020", "Nadia", "Mansour", "FEMALE", "2006-04-17", "CHILD", "SINGLE", "SYR", "SECONDARY", "Student", "ISLAM", ["AR", "EN"], "Damascus"),
-    # HH 7 (ETH, 2)
-    (6, "RF-DEMO-0021", "Amina", "Mohamed", "FEMALE", "1987-08-21", "SELF", "SEPARATED", "ETH", "CAN_READ_AND_WRITE", "Vendor", "ISLAM", ["SO", "AM"], "Jijiga"),
-    (6, "RF-DEMO-0022", "Bilal", "Mohamed", "MALE", "2016-02-28", "CHILD", "SINGLE", "ETH", "NEVER_ATTEND", None, "ISLAM", ["SO"], "Jijiga"),
-    # HH 8 (YEM, 3)
-    (7, "RF-DEMO-0023", "Ali", "Al-Harbi", "MALE", "1982-12-09", "SELF", "MARRIED", "YEM", "TERTIARY", "Pharmacist", "ISLAM", ["AR", "EN"], "Aden"),
-    (7, "RF-DEMO-0024", "Fatima", "Al-Harbi", "FEMALE", "1985-03-16", "SPOUSE", "MARRIED", "YEM", "SECONDARY", "Teacher", "ISLAM", ["AR"], "Aden"),
-    (7, "RF-DEMO-0025", "Zainab", "Al-Harbi", "FEMALE", "1955-01-05", "PARENT", "WIDOWED", "YEM", "ILLITERATE", None, "ISLAM", ["AR"], "Taiz"),
+    (0, "RF-DEMO-0001", "Deng", "GARANG", "MALE", "1986-04-12", False, "Juba, South Sudan", "SSD", "SSD", "MARRIED", ["JUBA_ARABIC", "DINKA", "ENGLISH"], "2024-03-15", "HEAD", "PRESENT", "RECOGNISED_REFUGEE", "2024-04-02", "CLEARED", "NO", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+    (0, "RF-DEMO-0002", "Nyabol", "GARANG", "FEMALE", "1990-09-21", False, "Bor, South Sudan", "SSD", "SSD", "MARRIED", ["DINKA", "JUBA_ARABIC"], "2024-03-15", "SPOUSE", "PRESENT", "RECOGNISED_REFUGEE", "2024-04-02", "CLEARED", "NO", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+    (0, "RF-DEMO-0003", "Akech", "GARANG", "FEMALE", "2012-06-11", False, "Juba, South Sudan", "SSD", "SSD", "SINGLE", ["DINKA", "ENGLISH"], "2024-03-15", "SON_DAUGHTER", "PRESENT", "RECOGNISED_REFUGEE", None, "CLEARED", "NO", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+    (0, "RF-DEMO-0004", "Lual", "GARANG", "MALE", "2016-02-03", True, "Yei, South Sudan", "SSD", "SSD", "SINGLE", ["DINKA"], "2024-03-15", "SON_DAUGHTER", "PRESENT", "RECOGNISED_REFUGEE", None, "CLEARED", "NO", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+
+    (1, "RF-DEMO-0005", "Chantal", "MUKAMANA", "FEMALE", "1988-03-19", False, "Goma, North Kivu", "COD", "COD", "WIDOWED", ["KISWAHILI", "FRENCH", "LINGALA"], "2025-01-10", "HEAD", "PRESENT", "ASYLUM_SEEKER_PENDING_INTERVIEW", "2025-01-22", "CLEARED", "NO", False, "NO_DIFFICULTY", "SOME_DIFFICULTY"),
+    (1, "RF-DEMO-0006", "Patrick", "HABIMANA", "MALE", "2010-11-08", False, "Goma, North Kivu", "COD", "COD", "SINGLE", ["KISWAHILI", "ENGLISH"], "2025-01-10", "SON_DAUGHTER", "PRESENT", "ASYLUM_SEEKER_PENDING_INTERVIEW", None, "CLEARED", "NO", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+    (1, "RF-DEMO-0007", "Grace", "UWASE", "FEMALE", "2015-05-14", False, "Rutshuru, DRC", "COD", "COD", "SINGLE", ["KISWAHILI"], "2025-01-10", "SON_DAUGHTER", "PRESENT", "ASYLUM_SEEKER_PENDING_INTERVIEW", None, "CLEARED", "NO", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+
+    (2, "RF-DEMO-0008", "Jean-Baptiste", "NSENGIYUMVA", "MALE", "1983-07-25", False, "Bukavu, South Kivu", "COD", "COD", "MARRIED", ["FRENCH", "KISWAHILI", "LINGALA"], "2023-08-20", "HEAD", "PRESENT", "RECOGNISED_REFUGEE", "2023-09-05", "CLEARED", "NO", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+    (2, "RF-DEMO-0009", "Esperance", "NSENGIYUMVA", "FEMALE", "1987-01-18", False, "Bukavu, South Kivu", "COD", "COD", "MARRIED", ["KISWAHILI", "FRENCH"], "2023-08-20", "SPOUSE", "PRESENT", "RECOGNISED_REFUGEE", "2023-09-05", "CLEARED", "NO", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+    (2, "RF-DEMO-0010", "Divine", "NSENGIYUMVA", "FEMALE", "2008-12-01", False, "Bukavu, South Kivu", "COD", "COD", "SINGLE", ["KISWAHILI", "ENGLISH"], "2023-08-20", "SON_DAUGHTER", "PRESENT", "RECOGNISED_REFUGEE", None, "CLEARED", "NO", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+    (2, "RF-DEMO-0011", "Samuel", "NSENGIYUMVA", "MALE", "2014-08-17", False, "Kyangwali, Uganda", "COD", "COD", "SINGLE", ["KISWAHILI"], "2023-08-20", "SON_DAUGHTER", "PRESENT", "RECOGNISED_REFUGEE", None, "CLEARED", "NO", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+
+    (3, "RF-DEMO-0012", "Claudine", "NDUWIMANA", "FEMALE", "1979-02-14", True, "Bujumbura, Burundi", "BDI", "BDI", "SEPARATED", ["KINYARWANDA", "FRENCH", "KISWAHILI"], "2024-11-01", "HEAD", "PRESENT", "RECOGNISED_REFUGEE", "2024-11-18", "CLEARED", "NO", True, "SOME_DIFFICULTY", "A_LOT_OF_DIFFICULTY"),
+    (3, "RF-DEMO-0013", "Eric", "NDUWIMANA", "MALE", "2006-05-30", False, "Gitega, Burundi", "BDI", "BDI", "SINGLE", ["KINYARWANDA", "ENGLISH"], "2024-11-01", "SON_DAUGHTER", "TEMPORARILY_ABSENT", "RECOGNISED_REFUGEE", None, "CLEARED", "NO", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+    (3, "RF-DEMO-0014", "Tharcisse", "NTIRANDEKURA", "MALE", "1952-10-10", True, "Ngozi, Burundi", "BDI", "BDI", "WIDOWED", ["KINYARWANDA"], "2024-11-01", "PARENT", "PRESENT", "RECOGNISED_REFUGEE", "2024-11-18", "CLEARED", "NO", True, "A_LOT_OF_DIFFICULTY", "A_LOT_OF_DIFFICULTY"),
+
+    (4, "RF-DEMO-0015", "Abdirahman", "HASSAN", "MALE", "1991-06-09", False, "Mogadishu, Somalia", "SOM", "SOM", "SINGLE", ["SOMALI", "ENGLISH", "ARABIC"], "2025-02-14", "HEAD", "PRESENT", "ASYLUM_SEEKER_LODGED", "2025-02-28", "PENDING", "NO", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+    (4, "RF-DEMO-0016", "Hodan", "HASSAN", "FEMALE", "1996-09-22", False, "Mogadishu, Somalia", "SOM", "SOM", "SINGLE", ["SOMALI", "ENGLISH"], "2025-02-14", "SIBLING", "PRESENT", "ASYLUM_SEEKER_LODGED", "2025-02-28", "PENDING", "NO", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+
+    (5, "RF-DEMO-0017", "Simon", "LOKU", "MALE", "1984-01-05", False, "Yei, South Sudan", "SSD", "SSD", "MARRIED", ["BARI", "JUBA_ARABIC", "ENGLISH"], "2024-06-05", "HEAD", "PRESENT", "RECOGNISED_REFUGEE", "2024-06-19", "CLEARED", "NO", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+    (5, "RF-DEMO-0018", "Rose", "LOKU", "FEMALE", "1989-11-28", False, "Yei, South Sudan", "SSD", "SSD", "MARRIED", ["BARI", "JUBA_ARABIC"], "2024-06-05", "SPOUSE", "PRESENT", "RECOGNISED_REFUGEE", "2024-06-19", "CLEARED", "NO", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+    (5, "RF-DEMO-0019", "Daniel", "LOKU", "MALE", "2013-03-19", False, "Yei, South Sudan", "SSD", "SSD", "SINGLE", ["BARI", "ENGLISH"], "2024-06-05", "SON_DAUGHTER", "PRESENT", "RECOGNISED_REFUGEE", None, "CLEARED", "NO", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+
+    (6, "RF-DEMO-0020", "Gideon", "GATLUAK", "MALE", "2010-08-14", True, "Malakal, South Sudan", "SSD", "SSD", "SINGLE", ["NUER", "JUBA_ARABIC"], "2025-03-01", "HEAD", "PRESENT", "RECOGNISED_REFUGEE", "2025-03-12", "CLEARED", "UNACCOMPANIED", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+    (6, "RF-DEMO-0021", "Nyakan", "GATLUAK", "FEMALE", "2013-04-02", True, "Malakal, South Sudan", "SSD", "SSD", "SINGLE", ["NUER"], "2025-03-01", "SIBLING", "PRESENT", "RECOGNISED_REFUGEE", None, "CLEARED", "SEPARATED", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+    (6, "RF-DEMO-0022", "Koang", "GATLUAK", "MALE", "2017-01-19", True, "Malakal, South Sudan", "SSD", "SSD", "SINGLE", ["NUER"], "2025-03-01", "SIBLING", "PRESENT", "RECOGNISED_REFUGEE", None, "CLEARED", "SEPARATED", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+
+    (7, "RF-DEMO-0023", "Halima", "FARAH", "FEMALE", "1982-07-11", False, "Hargeisa, Somalia", "SOM", "SOM", "DIVORCED", ["SOMALI", "ARABIC", "ENGLISH"], "2024-09-12", "HEAD", "PRESENT", "RECOGNISED_REFUGEE", "2024-09-25", "CLEARED", "NO", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+    (7, "RF-DEMO-0024", "Yasmin", "FARAH", "FEMALE", "2007-10-04", False, "Mogadishu, Somalia", "SOM", "SOM", "SINGLE", ["SOMALI", "ENGLISH"], "2024-09-12", "SON_DAUGHTER", "PRESENT", "RECOGNISED_REFUGEE", None, "CLEARED", "NO", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
+    (7, "RF-DEMO-0025", "Ibrahim", "FARAH", "MALE", "2011-12-27", False, "Mogadishu, Somalia", "SOM", "SOM", "SINGLE", ["SOMALI", "ENGLISH"], "2024-09-12", "SON_DAUGHTER", "PRESENT", "RECOGNISED_REFUGEE", None, "CLEARED", "NO", False, "NO_DIFFICULTY", "NO_DIFFICULTY"),
 ]
 
 
@@ -138,7 +135,7 @@ def main() -> None:
     geo_units = _fetch_geo_units()
     conn = psycopg2.connect(
         host=os.environ.get("PGHOST", "localhost"),
-        port=os.environ.get("PGPORT", "5432"),
+        port=int(os.environ.get("PGPORT", "5432")),
         dbname=os.environ.get("PGDATABASE", "refugee_registry_db"),
         user=os.environ.get("PGUSER", "postgres"),
         password=os.environ.get("PGPASSWORD", "postgres"),
@@ -146,67 +143,106 @@ def main() -> None:
     cols_cache: dict[str, set[str]] = {}
     hh_ids: list[str] = []
     ref_ids: list[str] = []
+    head_ref_ids: list[str] = []
 
     try:
         with conn:
             with conn.cursor() as cur:
+                # Precompute head refugee IDs per household
+                hh_head_map = {}
+                for hh_idx, func_id, *_rest in REFUGEES:
+                    rel = _rest[11]
+                    if rel == "HEAD" and hh_idx not in hh_head_map:
+                        hh_head_map[hh_idx] = func_id
+
                 # 1. Households
-                for idx, (func_id, status, origin, arrival, reg_date, addr, phone, consent) in enumerate(HOUSEHOLDS):
+                for idx, hh in enumerate(HOUSEHOLDS):
+                    (
+                        func_id, reg_date, entry_pt, reg_site, officer,
+                        district, settlement, zone, village, income, earners,
+                        assist_cat, vuln, new_arr, new_end, progs, mod, mech,
+                        fdp, amt, cycle, pay_st, tx_ref, female_head, child_head,
+                    ) = hh
                     hh_id = _uid(func_id)
                     hh_ids.append(hh_id)
                     members = [r for r in REFUGEES if r[0] == idx]
-                    male_cnt = sum(1 for r in members if r[4] == "MALE")
-                    female_cnt = sum(1 for r in members if r[4] == "FEMALE")
-                    child_cnt = sum(1 for r in members if int(r[5][:4]) >= 2009)
+                    group_size = len(members)
+                    children = sum(1 for r in members if int(r[5][:4]) >= 2008)
+                    dep_ratio = round(children / max(1, group_size - children), 2)
                     geo_id, geo_hier = geo_units[idx % len(geo_units)]
-                    rec_name = f"{func_id} {origin} {status}"
-                    search_txt = f"{func_id} {rec_name} {origin} {status} {addr} {phone} {DEMO_TAG}"
-                    _insert_row(
+                    head_func = hh_head_map.get(idx, "")
+                    _upsert_row(
                         cur,
                         "g2p_register_households",
                         cols_cache,
                         {
                             "internal_record_id": hh_id,
                             "functional_record_id": func_id,
-                            "record_name": rec_name,
+                            "record_name": f"{func_id} {settlement} {district}",
                             "record_status": "ACTIVE",
                             "record_status_reason": DEMO_TAG,
                             "created_by": SEEDER,
                             "created_at": NOW_TS,
                             "last_approved_by": SEEDER,
                             "last_approved_at": NOW_TS,
-                            "search_text": search_txt,
-                            "group_size": len(members),
-                            "number_of_male": male_cnt,
-                            "number_of_female": female_cnt,
-                            "number_of_children": child_cnt,
-                            "date_of_arrival": arrival,
+                            "search_text": f"{func_id} {district} {settlement} {zone} {village} {assist_cat} {tx_ref} {DEMO_TAG}",
                             "registration_date": reg_date,
-                            "legal_status": status,
-                            "current_country_of_asylum_address": addr,
-                            "country_of_origin": origin,
-                            "phone_number": phone,
-                            "consent_or_prohibition_to_share_information": consent,
+                            "entry_point": entry_pt,
+                            "registration_site": reg_site,
+                            "registering_officer_id": officer,
+                            "head_of_household_id": head_func,
+                            "group_size": group_size,
+                            "dependency_ratio": dep_ratio,
+                            "is_female_headed": female_head,
+                            "is_child_headed": child_head,
+                            "host_district": district,
+                            "settlement_location": settlement,
+                            "zone_cluster": zone,
+                            "village_block": village,
+                            "main_income_source": income,
+                            "working_age_earners": earners,
+                            "assistance_category": assist_cat,
+                            "vulnerability_score": vuln,
+                            "is_new_arrival": new_arr,
+                            "new_arrival_end_date": new_end,
+                            "programmes_enrolled": progs,
+                            "enrolment_date": reg_date,
+                            "delivery_modality": mod,
+                            "delivery_mechanism": mech,
+                            "primary_recipient_id": head_func,
+                            "food_distribution_point": fdp,
+                            "entitlement_amount": amt,
+                            "entitlement_currency": "UGX",
+                            "payment_cycle": cycle,
+                            "payment_status": pay_st,
+                            "transaction_reference": tx_ref,
+                            "transaction_date": "2026-11-15",
+                            "lifecycle_status": "ACTIVE",
+                            "last_updated_at": NOW_TS,
+                            "last_updated_by": SEEDER,
                             "geo_lowest_level_value_id": geo_id,
                             "geo_code_hierarchy_json": geo_hier,
-                            "country_code": "ET",
-                            "address_line_1": addr,
-                            "latitude": 9.03 + idx * 0.05,
-                            "longitude": 38.74 + idx * 0.05,
+                            "country_code": "UG",
                         },
                     )
 
                 # 2. Refugees
-                head_ref_ids: list[str] = []
-                for idx, (hh_idx, func_id, first, last, gender, dob, rel, marital, origin, edu, occ, religion, langs, pob) in enumerate(REFUGEES):
+                for idx, r in enumerate(REFUGEES):
+                    (
+                        hh_idx, func_id, given, surname, gender, dob, dob_est,
+                        pob, origin, nat, marital, langs, arrival, rel, presence,
+                        legal, rsd_dt, screen, uasc, med, wg_see, wg_walk,
+                    ) = r
                     ref_id = _uid(func_id)
                     ref_ids.append(ref_id)
-                    if rel == "SELF":
+                    if rel == "HEAD":
                         head_ref_ids.append(ref_id)
                     hh_id = hh_ids[hh_idx]
-                    rec_name = f"{first} {last}"
-                    search_txt = f"{func_id} {first} {last} {gender} {origin} {rel} {religion} {' '.join(langs)} {pob} {DEMO_TAG}"
-                    _insert_row(
+                    progs = HOUSEHOLDS[hh_idx][15]
+                    reg_date = HOUSEHOLDS[hh_idx][1]
+                    rec_name = f"{given} {surname}"
+                    search_txt = f"{func_id} {given} {surname} {gender} {origin} {nat} {legal} {' '.join(langs)} {pob} {DEMO_TAG}"
+                    _upsert_row(
                         cur,
                         "g2p_register_refugees",
                         cols_cache,
@@ -222,30 +258,56 @@ def main() -> None:
                             "last_approved_by": SEEDER,
                             "last_approved_at": NOW_TS,
                             "search_text": search_txt,
-                            "first_name": first,
-                            "last_name": last,
+                            "first_name": given,
+                            "given_name": given,
+                            "last_name": surname,
                             "gender": gender,
                             "birth_date": dob,
-                            "marital_status": marital,
-                            "relationship_to_group": rel,
-                            "country_of_origin": origin,
-                            "fathers_name": f"Father of {first}",
-                            "mothers_name": f"Mother of {first}",
-                            "highest_education_level": edu,
-                            "last_occupation": occ,
-                            "religion": religion,
-                            "languages_known": langs,
+                            "is_birth_date_estimated": dob_est,
                             "place_of_birth": pob,
+                            "country_of_origin": origin,
+                            "nationality": nat,
+                            "marital_status": marital,
+                            "languages_known": langs,
+                            "arrival_date": arrival,
+                            "relationship_to_group": rel,
+                            "presence_status": presence,
+                            "legal_status": legal,
+                            "rsd_application_date": rsd_dt,
+                            "security_screening_status": screen,
+                            "unaccompanied_separated_status": uasc,
+                            "has_serious_medical_condition": med,
+                            "wg_seeing": wg_see,
+                            "wg_hearing": "NO_DIFFICULTY",
+                            "wg_walking": wg_walk,
+                            "wg_remembering": "NO_DIFFICULTY",
+                            "wg_self_care": "NO_DIFFICULTY",
+                            "wg_communicating": "NO_DIFFICULTY",
+                            "programmes_enrolled": progs,
+                            "enrolment_date": reg_date,
+                            "auth_result": "FINGERPRINT_OK",
+                            "informed_consent_given": True,
+                            "informed_consent_date": reg_date,
+                            "partner_data_sharing_consent": ["OPM", "UNHCR", "WFP"],
+                            "lifecycle_status": "ACTIVE",
+                            "duplicate_check_result": "UNIQUE",
+                            "last_updated_at": NOW_TS,
+                            "last_updated_by": SEEDER,
                         },
                     )
 
-                # 3. IdentityDocument (1-2 per adult/most refugees)
+                # 3. IdentityDocument
+                doc_types = [
+                    "REFUGEE_ID_CARD",
+                    "REFUGEE_FAMILY_ATTESTATION",
+                    "ASYLUM_REGISTRATION_CARD",
+                    "ASYLUM_SEEKER_CERTIFICATE",
+                ]
                 for idx, ref_id in enumerate(ref_ids[:18]):
                     doc_id = _uid(f"doc-{idx}-1")
-                    doc_type = ["REFUGEE_ID", "NATIONAL_ID", "PASSPORT", "ASYLUM_SEEKER_CERTIFICATE"][idx % 4]
-                    issuer = "UNHCR" if doc_type == "REFUGEE_ID" else "NATIONAL_GOVERNMENT"
-                    doc_num = f"DOC-2025-{idx + 1001}"
-                    _insert_row(
+                    doc_type = doc_types[idx % len(doc_types)]
+                    doc_num = f"UG-DOC-2025-{idx + 1001}"
+                    _upsert_row(
                         cur,
                         "g2p_register_identity_documents",
                         cols_cache,
@@ -259,183 +321,50 @@ def main() -> None:
                             "created_at": NOW_TS,
                             "last_approved_by": SEEDER,
                             "last_approved_at": NOW_TS,
-                            "search_text": f"{doc_type} {doc_num} {issuer} {DEMO_TAG}",
+                            "search_text": f"{doc_type} {doc_num} {DEMO_TAG}",
                             "document_type": doc_type,
                             "document_number": doc_num,
-                            "issuer_type": issuer,
                             "issue_date": "2024-05-01",
                             "expiry_date": "2029-05-01",
                         },
                     )
 
-                # 4. DisplacementHistory (each household head)
-                for idx, ref_id in enumerate(head_ref_ids):
-                    _insert_row(
-                        cur,
-                        "g2p_register_displacement_histories",
-                        cols_cache,
-                        {
-                            "internal_record_id": _uid(f"disp-{idx}"),
-                            "link_internal_record_id": ref_id,
-                            "record_name": f"2024-01-10 Displacement {idx + 1}",
-                            "record_status": "ACTIVE",
-                            "record_status_reason": DEMO_TAG,
-                            "created_by": SEEDER,
-                            "created_at": NOW_TS,
-                            "last_approved_by": SEEDER,
-                            "last_approved_at": NOW_TS,
-                            "search_text": f"Armed conflict and insecurity transit {DEMO_TAG}",
-                            "reasons_for_unwillingness_or_inability_to_return": "Ongoing conflict and lack of physical safety in area of origin",
-                            "travel_details": "Crossed border on foot and by bus to reception center",
-                            "departure_date": "2024-01-10",
-                            "transit_countries": "Border transit",
-                        },
-                    )
-
-                # 5. SpecificNeeds (~6 rows)
-                needs = [
-                    (2, "UNACCOMPANIED_CHILD", "HIGH", "Child protection case management"),
-                    (6, "SEPARATED_CHILD", "MODERATE", "Family tracing support"),
-                    (11, "CHRONIC_ILLNESS", "HIGH", "Regular medication and clinic referral"),
-                    (16, "PHYSICAL_DISABILITY", "MODERATE", "Mobility aid and accessible shelter"),
-                    (20, "SINGLE_PARENT", "MODERATE", "Livelihood and childcare support"),
-                    (24, "OLDER_PERSON", "CRITICAL", "Home-based care and food assistance"),
+                # 4. SpecificNeeds
+                needs_data = [
+                    (11, "SERIOUS_MEDICAL_CONDITION", "Ongoing hypertension and diabetes care"),
+                    (13, "OLDER_PERSON_AT_RISK", "Mobility assistance and priority distribution"),
+                    (13, "DISABILITY", "Walking aid required"),
+                    (19, "UNACCOMPANIED_OR_SEPARATED_CHILD", "Unaccompanied minor in foster care"),
+                    (20, "CHILD_AT_RISK", "Separated child under sibling care"),
+                    (22, "WOMAN_AT_RISK", "Single female-headed household support"),
                 ]
-                for idx, (r_idx, cat, sev, sup) in enumerate(needs):
-                    _insert_row(
+                for idx, (r_idx, cat, notes) in enumerate(needs_data):
+                    _upsert_row(
                         cur,
                         "g2p_register_specific_needs",
                         cols_cache,
                         {
                             "internal_record_id": _uid(f"need-{idx}"),
                             "link_internal_record_id": ref_ids[r_idx],
-                            "record_name": f"{cat} {sev}",
+                            "record_name": f"{cat}",
                             "record_status": "ACTIVE",
                             "record_status_reason": DEMO_TAG,
                             "created_by": SEEDER,
                             "created_at": NOW_TS,
                             "last_approved_by": SEEDER,
                             "last_approved_at": NOW_TS,
-                            "search_text": f"{cat} {sev} {sup} {DEMO_TAG}",
+                            "search_text": f"{cat} {notes} {DEMO_TAG}",
                             "need_category": cat,
-                            "severity": sev,
                             "date_identified": "2025-02-01",
-                            "support_required": sup,
-                            "notes": "Demo specific needs assessment",
-                        },
-                    )
-
-                # 6. Relative (~10 rows)
-                for idx in range(10):
-                    r_idx = idx % len(ref_ids)
-                    rel_type = ["SPOUSE", "CHILD", "PARENT", "SIBLING"][idx % 4]
-                    rel_name = f"Relative {idx + 1} Demo"
-                    _insert_row(
-                        cur,
-                        "g2p_register_relatives",
-                        cols_cache,
-                        {
-                            "internal_record_id": _uid(f"rel-{idx}"),
-                            "link_internal_record_id": ref_ids[r_idx],
-                            "record_name": f"{rel_name} {rel_type}",
-                            "record_status": "ACTIVE",
-                            "record_status_reason": DEMO_TAG,
-                            "created_by": SEEDER,
-                            "created_at": NOW_TS,
-                            "last_approved_by": SEEDER,
-                            "last_approved_at": NOW_TS,
-                            "search_text": f"{rel_name} {rel_type} {DEMO_TAG}",
-                            "relationship": rel_type,
-                            "full_name": rel_name,
-                            "date_of_birth": "1995-04-12",
-                            "location_or_status": "Residing in same household",
-                        },
-                    )
-
-                # 7. Address (2 per refugee for 5 refugees)
-                for idx in range(5):
-                    ref_id = ref_ids[idx]
-                    origin = REFUGEES[idx][8]
-                    for addr_type, line1, ctry in (
-                        ("COUNTRY_OF_ASYLUM", f"Camp Block {idx + 1}", "ETH"),
-                        ("COUNTRY_OF_ORIGIN", f"Home District {idx + 1}", origin),
-                    ):
-                        _insert_row(
-                            cur,
-                            "g2p_register_addresses",
-                            cols_cache,
-                            {
-                                "internal_record_id": _uid(f"addr-{idx}-{addr_type}"),
-                                "link_internal_record_id": ref_id,
-                                "record_name": f"{addr_type} {ctry}",
-                                "record_status": "ACTIVE",
-                                "record_status_reason": DEMO_TAG,
-                                "created_by": SEEDER,
-                                "created_at": NOW_TS,
-                                "last_approved_by": SEEDER,
-                                "last_approved_at": NOW_TS,
-                                "search_text": f"{addr_type} {line1} {ctry} {DEMO_TAG}",
-                                "address_type": addr_type,
-                                "address_line_1": line1,
-                                "address_line_2": "Sector 1",
-                                "country": ctry,
-                            },
-                        )
-
-                # 8. EducationRecord (6 rows)
-                for idx, r_idx in enumerate((0, 4, 11, 12, 17, 22)):
-                    lvl = REFUGEES[r_idx][9]
-                    _insert_row(
-                        cur,
-                        "g2p_register_education_records",
-                        cols_cache,
-                        {
-                            "internal_record_id": _uid(f"edu-{idx}"),
-                            "link_internal_record_id": ref_ids[r_idx],
-                            "record_name": f"{lvl} Demo Institute",
-                            "record_status": "ACTIVE",
-                            "record_status_reason": DEMO_TAG,
-                            "created_by": SEEDER,
-                            "created_at": NOW_TS,
-                            "last_approved_by": SEEDER,
-                            "last_approved_at": NOW_TS,
-                            "search_text": f"{lvl} Demo Institute {DEMO_TAG}",
-                            "level": lvl,
-                            "institution": f"National Institute {idx + 1}",
-                            "field_of_study": "General Studies",
-                            "year_completed": 2010 + idx,
-                        },
-                    )
-
-                # 9. OccupationSkill (6 rows)
-                for idx, r_idx in enumerate((0, 4, 5, 11, 17, 22)):
-                    occ = REFUGEES[r_idx][10] or "General Labor"
-                    _insert_row(
-                        cur,
-                        "g2p_register_occupation_skills",
-                        cols_cache,
-                        {
-                            "internal_record_id": _uid(f"occ-{idx}"),
-                            "link_internal_record_id": ref_ids[r_idx],
-                            "record_name": f"{occ}",
-                            "record_status": "ACTIVE",
-                            "record_status_reason": DEMO_TAG,
-                            "created_by": SEEDER,
-                            "created_at": NOW_TS,
-                            "last_approved_by": SEEDER,
-                            "last_approved_at": NOW_TS,
-                            "search_text": f"{occ} Vocational {DEMO_TAG}",
-                            "occupation": occ,
-                            "skill": f"{occ} Operations",
-                            "years_of_experience": 3 + idx,
+                            "notes": notes,
                         },
                     )
     finally:
         conn.close()
 
     print(
-        f"[refugee-demo] Seeded {len(hh_ids)} households and {len(ref_ids)} refugees "
-        f"using {len(geo_units)} MDS geo unit(s)."
+        f"Seeded {len(hh_ids)} households, {len(ref_ids)} refugees, "
+        f"18 identity documents, 6 specific needs (Uganda mandatory model)."
     )
 
 

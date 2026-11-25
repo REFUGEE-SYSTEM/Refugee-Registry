@@ -1,3 +1,5 @@
+from datetime import date, datetime
+
 from openg2p_registry_core.models import (
     G2PGeo,
     G2PGeoHistory,
@@ -7,29 +9,38 @@ from openg2p_registry_core.models import (
     G2PRegisterHistory,
 )
 from openg2p_registry_core.models.g2p_intake_form import G2PIntakeForm
-from sqlalchemy import String
+from sqlalchemy import Boolean, Date, DateTime, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from ..services import G2PRegisterDomainServiceRefugee
-from .enums import HighestEducationLevelEnum, RelationshipToGroupEnum, ReligionEnum
+from .enums import (
+    AuthResultEnum,
+    DuplicateCheckEnum,
+    ExitReasonEnum,
+    HighestEducationLevelEnum,
+    LegalStatusEnum,
+    PresenceStatusEnum,
+    RefugeeRecordStatusEnum,
+    RelationshipToGroupEnum,
+    ReligionEnum,
+    SecurityScreeningEnum,
+    UnaccompaniedChildEnum,
+    WashingtonGroupAnswerEnum,
+)
 
-# TODO: Biometrics (fingerprints, iris, face templates, BIMS history/duplicate flags)
-# are out of scope for Step 3 and deferred to a separate integration step.
+# TODO: Biometrics (C01 facial photo, C02 fingerprints, C05 last biometric verification date)
+# are out of scope for this demo build and deferred to a separate integration step.
 
 
 class G2PRefugee:
-    """Domain attributes for Refugee individual (inherits G2PPerson core fields).
+    """Domain attributes for Refugee individual (Uganda mandatory model + preserved legacy columns)."""
 
-    Links to Household via G2PRegister.link_internal_record_id (same pattern as
-    Farmer -> Household in farmer-registry). Photo is stored via
-    G2PRegister.record_image_document_id.
-    """
-
+    # Legacy columns (preserved, never dropped)
     relationship_to_group: Mapped[RelationshipToGroupEnum] = mapped_column(
         String, nullable=True
-    )
-    country_of_origin: Mapped[str] = mapped_column(String, nullable=True)
+    )  # F02
+    country_of_origin: Mapped[str] = mapped_column(String, nullable=True)  # B08
     fathers_name: Mapped[str] = mapped_column(String, nullable=True)
     mothers_name: Mapped[str] = mapped_column(String, nullable=True)
     highest_education_level: Mapped[HighestEducationLevelEnum] = mapped_column(
@@ -37,8 +48,41 @@ class G2PRefugee:
     )
     last_occupation: Mapped[str] = mapped_column(String, nullable=True)
     religion: Mapped[ReligionEnum] = mapped_column(String, nullable=True)
-    languages_known: Mapped[list] = mapped_column(JSONB, nullable=True)
-    place_of_birth: Mapped[str] = mapped_column(String, nullable=True)
+    languages_known: Mapped[list] = mapped_column(JSONB, nullable=True)  # B11
+    place_of_birth: Mapped[str] = mapped_column(String, nullable=True)  # B07
+
+    # Uganda Mandatory Individual attributes
+    arrival_date: Mapped[date] = mapped_column(Date, nullable=True)  # A03
+    is_birth_date_estimated: Mapped[bool] = mapped_column(Boolean, nullable=True)  # B06
+    nationality: Mapped[str] = mapped_column(String, nullable=True)  # B09
+    legal_status: Mapped[LegalStatusEnum] = mapped_column(String, nullable=True)  # E01
+    rsd_application_date: Mapped[date] = mapped_column(Date, nullable=True)  # E03
+    security_screening_status: Mapped[SecurityScreeningEnum] = mapped_column(
+        String, nullable=True
+    )  # E07
+    presence_status: Mapped[PresenceStatusEnum] = mapped_column(String, nullable=True)  # F07
+    unaccompanied_separated_status: Mapped[UnaccompaniedChildEnum] = mapped_column(
+        String, nullable=True
+    )  # I02
+    wg_seeing: Mapped[WashingtonGroupAnswerEnum] = mapped_column(String, nullable=True)  # J01
+    wg_hearing: Mapped[WashingtonGroupAnswerEnum] = mapped_column(String, nullable=True)  # J01
+    wg_walking: Mapped[WashingtonGroupAnswerEnum] = mapped_column(String, nullable=True)  # J01
+    wg_remembering: Mapped[WashingtonGroupAnswerEnum] = mapped_column(String, nullable=True)  # J01
+    wg_self_care: Mapped[WashingtonGroupAnswerEnum] = mapped_column(String, nullable=True)  # J01
+    wg_communicating: Mapped[WashingtonGroupAnswerEnum] = mapped_column(String, nullable=True)  # J01
+    has_serious_medical_condition: Mapped[bool] = mapped_column(Boolean, nullable=True)  # J02
+    programmes_enrolled: Mapped[list] = mapped_column(JSONB, nullable=True)  # M04
+    enrolment_date: Mapped[date] = mapped_column(Date, nullable=True)  # M05
+    exit_date: Mapped[date] = mapped_column(Date, nullable=True)  # M05
+    exit_reason: Mapped[ExitReasonEnum] = mapped_column(String, nullable=True)  # M05
+    auth_result: Mapped[AuthResultEnum] = mapped_column(String, nullable=True)  # O02
+    informed_consent_given: Mapped[bool] = mapped_column(Boolean, nullable=True)  # P01
+    informed_consent_date: Mapped[date] = mapped_column(Date, nullable=True)  # P01
+    partner_data_sharing_consent: Mapped[list] = mapped_column(JSONB, nullable=True)  # P02
+    lifecycle_status: Mapped[RefugeeRecordStatusEnum] = mapped_column(String, nullable=True)  # Q01
+    duplicate_check_result: Mapped[DuplicateCheckEnum] = mapped_column(String, nullable=True)  # Q03
+    last_updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)  # Q04
+    last_updated_by: Mapped[str] = mapped_column(String, nullable=True)  # Q04
 
 
 class G2PRegisterRefugee(G2PRegister, G2PPerson, G2PGeo, G2PRefugee):

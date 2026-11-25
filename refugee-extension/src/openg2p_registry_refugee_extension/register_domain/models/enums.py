@@ -2,31 +2,35 @@ from enum import StrEnum
 
 
 class LegalStatusEnum(StrEnum):
-    """Mirrors refugee domain's LEGAL_STATUS codelist."""
+    """Mirrors refugee domain's LEGAL_STATUS codelist (Uganda)."""
 
-    REFUGEE = "REFUGEE"
-    ASYLUM_SEEKER = "ASYLUM_SEEKER"
-    INTERNALLY_DISPLACED = "INTERNALLY_DISPLACED"
-    RETURNEE = "RETURNEE"
-    STATELESS = "STATELESS"
+    ASYLUM_SEEKER_LODGED = "ASYLUM_SEEKER_LODGED"
+    ASYLUM_SEEKER_PENDING_INTERVIEW = "ASYLUM_SEEKER_PENDING_INTERVIEW"
+    ASYLUM_SEEKER_PENDING_APPEAL = "ASYLUM_SEEKER_PENDING_APPEAL"
+    RECOGNISED_REFUGEE = "RECOGNISED_REFUGEE"
+    REJECTED = "REJECTED"
+    EXCLUDED = "EXCLUDED"
     HOST_COMMUNITY = "HOST_COMMUNITY"
-    OTHER = "OTHER"
 
 
 class RelationshipToGroupEnum(StrEnum):
-    """Mirrors refugee domain's REFUGEE_RELATIONSHIP_TO_GROUP codelist."""
+    """Mirrors refugee domain's REFUGEE_RELATIONSHIP_TO_GROUP codelist (Uganda)."""
 
-    SELF = "SELF"
+    HEAD = "HEAD"
     SPOUSE = "SPOUSE"
-    CHILD = "CHILD"
+    SON_DAUGHTER = "SON_DAUGHTER"
+    STEPCHILD = "STEPCHILD"
     PARENT = "PARENT"
     SIBLING = "SIBLING"
+    GRANDCHILD = "GRANDCHILD"
+    NIECE_NEPHEW = "NIECE_NEPHEW"
     OTHER_RELATIVE = "OTHER_RELATIVE"
-    NON_RELATIVE = "NON_RELATIVE"
+    FOSTER_CHILD = "FOSTER_CHILD"
+    UNRELATED = "UNRELATED"
 
 
 class RelativeRelationshipEnum(StrEnum):
-    """Mirrors Master Data's RELATIONSHIP_TO_HEAD codelist (for Relative table)."""
+    """Mirrors Master Data's RELATIONSHIP_TO_HEAD codelist (for legacy Relative table)."""
 
     SPOUSE = "SPOUSE"
     CHILD = "CHILD"
@@ -37,7 +41,7 @@ class RelativeRelationshipEnum(StrEnum):
 
 
 class HighestEducationLevelEnum(StrEnum):
-    """Mirrors Master Data's EDUCATION_LEVEL codelist."""
+    """Mirrors Master Data's EDUCATION_LEVEL codelist (legacy)."""
 
     ILLITERATE = "ILLITERATE"
     CAN_READ_AND_WRITE = "CAN_READ_AND_WRITE"
@@ -52,7 +56,7 @@ class HighestEducationLevelEnum(StrEnum):
 
 
 class ReligionEnum(StrEnum):
-    """Mirrors refugee domain's RELIGION codelist."""
+    """Mirrors refugee domain's RELIGION codelist (legacy)."""
 
     CHRISTIANITY = "CHRISTIANITY"
     ISLAM = "ISLAM"
@@ -65,22 +69,22 @@ class ReligionEnum(StrEnum):
 
 
 class DocumentTypeEnum(StrEnum):
-    """Mirrors refugee domain's IDENTITY_DOCUMENT_TYPE codelist."""
+    """Mirrors refugee domain's IDENTITY_DOCUMENT_TYPE codelist (Uganda)."""
 
-    NATIONAL_ID = "NATIONAL_ID"
-    PASSPORT = "PASSPORT"
-    REFUGEE_ID = "REFUGEE_ID"
+    ASYLUM_REGISTRATION_CARD = "ASYLUM_REGISTRATION_CARD"
     ASYLUM_SEEKER_CERTIFICATE = "ASYLUM_SEEKER_CERTIFICATE"
-    RESIDENCE_PERMIT = "RESIDENCE_PERMIT"
-    BIRTH_CERTIFICATE = "BIRTH_CERTIFICATE"
-    DRIVING_LICENSE = "DRIVING_LICENSE"
-    TRAVEL_DOCUMENT = "TRAVEL_DOCUMENT"
-    FAMILY_BOOKLET = "FAMILY_BOOKLET"
+    ASYLUM_CERTIFICATE_PENDING_APPEAL = "ASYLUM_CERTIFICATE_PENDING_APPEAL"
+    REFUGEE_FAMILY_ATTESTATION = "REFUGEE_FAMILY_ATTESTATION"
+    REFUGEE_ID_CARD = "REFUGEE_ID_CARD"
+    NIRA_BIRTH_CERTIFICATE = "NIRA_BIRTH_CERTIFICATE"
+    REFUGEE_TRAVEL_DOCUMENT = "REFUGEE_TRAVEL_DOCUMENT"
+    COUNTRY_OF_ORIGIN_PASSPORT_ID = "COUNTRY_OF_ORIGIN_PASSPORT_ID"
+    MARRIAGE_CERTIFICATE = "MARRIAGE_CERTIFICATE"
     OTHER = "OTHER"
 
 
 class IssuerTypeEnum(StrEnum):
-    """Mirrors refugee domain's DOCUMENT_ISSUER_TYPE codelist."""
+    """Mirrors refugee domain's DOCUMENT_ISSUER_TYPE codelist (legacy)."""
 
     NATIONAL_GOVERNMENT = "NATIONAL_GOVERNMENT"
     REGIONAL_GOVERNMENT = "REGIONAL_GOVERNMENT"
@@ -94,26 +98,23 @@ class IssuerTypeEnum(StrEnum):
 
 
 class NeedCategoryEnum(StrEnum):
-    """Mirrors refugee domain's SPECIFIC_NEED_CATEGORY codelist."""
+    """Mirrors refugee domain's SPECIFIC_NEED_CATEGORY codelist (Uganda UNHCR)."""
 
-    PHYSICAL_DISABILITY = "PHYSICAL_DISABILITY"
-    VISUAL_IMPAIRMENT = "VISUAL_IMPAIRMENT"
-    HEARING_IMPAIRMENT = "HEARING_IMPAIRMENT"
-    INTELLECTUAL_DISABILITY = "INTELLECTUAL_DISABILITY"
-    CHRONIC_ILLNESS = "CHRONIC_ILLNESS"
-    OLDER_PERSON = "OLDER_PERSON"
-    UNACCOMPANIED_CHILD = "UNACCOMPANIED_CHILD"
-    SEPARATED_CHILD = "SEPARATED_CHILD"
-    PREGNANT_WOMAN = "PREGNANT_WOMAN"
-    LACTATING_MOTHER = "LACTATING_MOTHER"
-    SINGLE_PARENT = "SINGLE_PARENT"
-    PROTECTION_RISK = "PROTECTION_RISK"
-    MENTAL_HEALTH_SUPPORT = "MENTAL_HEALTH_SUPPORT"
-    OTHER = "OTHER"
+    CHILD_AT_RISK = "CHILD_AT_RISK"
+    UNACCOMPANIED_OR_SEPARATED_CHILD = "UNACCOMPANIED_OR_SEPARATED_CHILD"
+    DISABILITY = "DISABILITY"
+    SERIOUS_MEDICAL_CONDITION = "SERIOUS_MEDICAL_CONDITION"
+    OLDER_PERSON_AT_RISK = "OLDER_PERSON_AT_RISK"
+    SINGLE_PARENT_OR_CAREGIVER = "SINGLE_PARENT_OR_CAREGIVER"
+    WOMAN_AT_RISK = "WOMAN_AT_RISK"
+    SGBV_SURVIVOR = "SGBV_SURVIVOR"
+    TORTURE_SURVIVOR = "TORTURE_SURVIVOR"
+    SPECIFIC_LEGAL_PHYSICAL_PROTECTION_NEEDS = "SPECIFIC_LEGAL_PHYSICAL_PROTECTION_NEEDS"
+    FAMILY_UNITY = "FAMILY_UNITY"
 
 
 class NeedSeverityEnum(StrEnum):
-    """Mirrors refugee domain's SPECIFIC_NEED_SEVERITY codelist."""
+    """Mirrors refugee domain's SPECIFIC_NEED_SEVERITY codelist (legacy)."""
 
     LOW = "LOW"
     MODERATE = "MODERATE"
@@ -122,7 +123,7 @@ class NeedSeverityEnum(StrEnum):
 
 
 class AddressTypeEnum(StrEnum):
-    """Mirrors refugee domain's REFUGEE_ADDRESS_TYPE codelist."""
+    """Mirrors refugee domain's REFUGEE_ADDRESS_TYPE codelist (legacy)."""
 
     CAMP = "CAMP"
     SETTLEMENT = "SETTLEMENT"
@@ -134,3 +135,134 @@ class AddressTypeEnum(StrEnum):
     COUNTRY_OF_ASYLUM = "COUNTRY_OF_ASYLUM"
     COUNTRY_OF_ORIGIN = "COUNTRY_OF_ORIGIN"
     OTHER = "OTHER"
+
+
+class RefugeeGenderEnum(StrEnum):
+    """Mirrors refugee domain's REFUGEE_GENDER codelist (Uganda B04)."""
+
+    MALE = "MALE"
+    FEMALE = "FEMALE"
+
+
+class RefugeeMaritalStatusEnum(StrEnum):
+    """Mirrors refugee domain's REFUGEE_MARITAL_STATUS codelist (Uganda B10)."""
+
+    SINGLE = "SINGLE"
+    MARRIED = "MARRIED"
+    DIVORCED = "DIVORCED"
+    SEPARATED = "SEPARATED"
+    WIDOWED = "WIDOWED"
+    ENGAGED = "ENGAGED"
+
+
+class PresenceStatusEnum(StrEnum):
+    """Mirrors refugee domain's PRESENCE_STATUS codelist (Uganda F07)."""
+
+    PRESENT = "PRESENT"
+    TEMPORARILY_ABSENT = "TEMPORARILY_ABSENT"
+    LEFT = "LEFT"
+    DECEASED = "DECEASED"
+
+
+class SecurityScreeningEnum(StrEnum):
+    """Mirrors refugee domain's SECURITY_SCREENING codelist (Uganda E07)."""
+
+    CLEARED = "CLEARED"
+    PENDING = "PENDING"
+    REFERRED = "REFERRED"
+
+
+class UnaccompaniedChildEnum(StrEnum):
+    """Mirrors refugee domain's UNACCOMPANIED_CHILD codelist (Uganda I02)."""
+
+    UNACCOMPANIED = "UNACCOMPANIED"
+    SEPARATED = "SEPARATED"
+    NO = "NO"
+
+
+class WashingtonGroupAnswerEnum(StrEnum):
+    """Mirrors refugee domain's WASHINGTON_GROUP_ANSWER codelist (Uganda J01)."""
+
+    NO_DIFFICULTY = "NO_DIFFICULTY"
+    SOME_DIFFICULTY = "SOME_DIFFICULTY"
+    A_LOT_OF_DIFFICULTY = "A_LOT_OF_DIFFICULTY"
+    CANNOT_DO_AT_ALL = "CANNOT_DO_AT_ALL"
+
+
+class IncomeSourceEnum(StrEnum):
+    """Mirrors refugee domain's INCOME_SOURCE codelist (Uganda L01)."""
+
+    FARMING = "FARMING"
+    CASUAL_LABOUR = "CASUAL_LABOUR"
+    BUSINESS = "BUSINESS"
+    SALARY = "SALARY"
+    REMITTANCES = "REMITTANCES"
+    AID_ONLY = "AID_ONLY"
+    NONE = "NONE"
+
+
+class DeliveryModalityEnum(StrEnum):
+    """Mirrors refugee domain's DELIVERY_MODALITY codelist (Uganda N01)."""
+
+    CASH = "CASH"
+    IN_KIND_FOOD = "IN_KIND_FOOD"
+    VOUCHER = "VOUCHER"
+    MIXED = "MIXED"
+
+
+class DeliveryMechanismEnum(StrEnum):
+    """Mirrors refugee domain's DELIVERY_MECHANISM codelist (Uganda Code Lists)."""
+
+    MOBILE_MONEY = "MOBILE_MONEY"
+    AGENCY_BANKING = "AGENCY_BANKING"
+    CASH_IN_HAND = "CASH_IN_HAND"
+    IN_KIND_FOOD = "IN_KIND_FOOD"
+
+
+class AuthResultEnum(StrEnum):
+    """Mirrors refugee domain's AUTH_RESULT codelist (Uganda O02)."""
+
+    FINGERPRINT_OK = "FINGERPRINT_OK"
+    IRIS_OK = "IRIS_OK"
+    MANUAL_OVERRIDE = "MANUAL_OVERRIDE"
+    FAILED = "FAILED"
+
+
+class PaymentStatusEnum(StrEnum):
+    """Mirrors refugee domain's PAYMENT_STATUS codelist (Uganda O03)."""
+
+    SENT = "SENT"
+    CREDITED = "CREDITED"
+    COLLECTED = "COLLECTED"
+    FAILED = "FAILED"
+    REVERSED = "REVERSED"
+    NOT_COLLECTED = "NOT_COLLECTED"
+
+
+class RefugeeRecordStatusEnum(StrEnum):
+    """Mirrors refugee domain's REFUGEE_RECORD_STATUS codelist (Uganda Q01)."""
+
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    SUSPENDED = "SUSPENDED"
+    CLOSED = "CLOSED"
+
+
+class DuplicateCheckEnum(StrEnum):
+    """Mirrors refugee domain's DUPLICATE_CHECK codelist (Uganda Q03)."""
+
+    UNIQUE = "UNIQUE"
+    POSSIBLE_DUPLICATE = "POSSIBLE_DUPLICATE"
+    CONFIRMED_DUPLICATE = "CONFIRMED_DUPLICATE"
+
+
+class ExitReasonEnum(StrEnum):
+    """Mirrors refugee domain's EXIT_REASON codelist (Uganda M05)."""
+
+    GRADUATED = "GRADUATED"
+    RELOCATED = "RELOCATED"
+    REPATRIATED = "REPATRIATED"
+    RESETTLED = "RESETTLED"
+    DECEASED = "DECEASED"
+    INACTIVE = "INACTIVE"
+    INELIGIBLE = "INELIGIBLE"
