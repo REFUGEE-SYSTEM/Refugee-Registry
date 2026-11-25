@@ -1,4 +1,12 @@
--- Refugee Registry UI Tabs (idempotent, Uganda category-per-tab layout)
+-- Refugee Registry UI Tabs (idempotent, Uganda category-per-tab layout only)
+DELETE FROM "public"."g2p_register_ui_tabs"
+WHERE "tab_id" IN (
+    'refugee_relatives_tab',
+    'refugee_addresses_tab',
+    'refugee_education_tab',
+    'refugee_occupation_tab'
+);
+
 INSERT INTO "public"."g2p_register_ui_tabs" ("tab_id","register_id","tab_label","tab_order","is_active") VALUES
 ('household_overview_tab','a0000000-0000-0000-0000-000000000001','household_overview_tab',1,'TRUE'),
 ('household_case_registration_tab','a0000000-0000-0000-0000-000000000001','household_case_registration_tab',2,'TRUE'),
@@ -17,11 +25,7 @@ INSERT INTO "public"."g2p_register_ui_tabs" ("tab_id","register_id","tab_label",
 ('refugee_targeting_tab','a0000000-0000-0000-0000-000000000002','refugee_targeting_tab',7,'TRUE'),
 ('refugee_distribution_auth_tab','a0000000-0000-0000-0000-000000000002','refugee_distribution_auth_tab',8,'TRUE'),
 ('refugee_consent_tab','a0000000-0000-0000-0000-000000000002','refugee_consent_tab',9,'TRUE'),
-('refugee_lifecycle_tab','a0000000-0000-0000-0000-000000000002','refugee_lifecycle_tab',10,'TRUE'),
-('refugee_relatives_tab','a0000000-0000-0000-0000-000000000002','refugee_relatives_tab',40,'FALSE'),
-('refugee_addresses_tab','a0000000-0000-0000-0000-000000000002','refugee_addresses_tab',50,'FALSE'),
-('refugee_education_tab','a0000000-0000-0000-0000-000000000002','refugee_education_tab',60,'FALSE'),
-('refugee_occupation_tab','a0000000-0000-0000-0000-000000000002','refugee_occupation_tab',70,'FALSE')
+('refugee_lifecycle_tab','a0000000-0000-0000-0000-000000000002','refugee_lifecycle_tab',10,'TRUE')
 ON CONFLICT ("tab_id") DO UPDATE SET
     "register_id" = EXCLUDED."register_id",
     "tab_label" = EXCLUDED."tab_label",
