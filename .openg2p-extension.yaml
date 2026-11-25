@@ -1,0 +1,15 @@
+variant: refugee-registry
+label: Refugee Registry
+product_repo: refugee-registry
+extension_dir: refugee-extension
+python_module: openg2p_registry_refugee_extension
+pip_name: openg2p-registry-refugee-extension
+variant_token: refugee
+registry_db: refugee_registry_db
+master_data_db: refugee_master_data_db
+staff_api_port: 8071
+ui_port: 3050
+master_data_api_port: 8049
+worker_queue: refugee_registry_worker_queue
+keycloak_client_id: refugee-registry-staff-portal
+ui_app_mnemonic: refugee-registry-staff-portal
