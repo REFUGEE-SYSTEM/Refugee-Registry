@@ -1,9 +1,8 @@
-# Refugee Registry — Known Limitations (Uganda Demo Build)
+# Refugee Registry — Known Limitations (Isolated Uganda Demo Build)
 
-1. **Uganda Code Lists vs. Illustrative Lists**: Lists on the `Code Lists` sheet (`LEGAL_STATUS`, `IDENTITY_DOCUMENT_TYPE`, `SPECIFIC_NEED_CATEGORY`, `REFUGEE_RELATIONSHIP_TO_GROUP`, `DELIVERY_MECHANISM`, `WASHINGTON_GROUP_ANSWER`) and inline `Format / allowed values` match `Uganda_Refugee_Data_Attributes.xlsx`. Settlement/site/programme lists (`ENTRY_POINT`, `REGISTRATION_SITE`, `HOST_DISTRICT`, `SETTLEMENT_LOCATION`, `ZONE_CLUSTER`, `VILLAGE_BLOCK`, `ASSISTANCE_CATEGORY`, `PROGRAMME`, `FOOD_DISTRIBUTION_POINT`) are illustrative Uganda-context demo lists.
-2. **Biometrics Out of Scope**: Mandatory biometric attributes `C01`, `C02`, and `C05` are out of scope (`TODO` in `register_domain/models/refugee.py`), with no Biometrics tab.
-3. **Security Screening (`E07`) Read-Only**: `security_screening_status` is read-only in the staff UI because screening outcomes originate from external security/vetting systems.
-4. **Consent & Data Protection (`P01`, `P02`)**: Stored as plain fields (`informed_consent_given`, `informed_consent_date`, `partner_data_sharing_consent`) on `G2PRefugee` for demo purposes; platform Consent Manager and `data_scopes.json` enforcement are not configured.
-5. **Hidden Legacy Sub-Registers**: `Relative`, `Address`, `EducationRecord`, `OccupationSkill`, and the old `DisplacementHistory` form section are hidden (`is_active = FALSE` on unused tabs; `refugee_displacement_tab` is reused and relabeled as **Legal Status & RSD** showing `E01`, `E03`, `E07` from `G2PRefugee`). Legacy DB columns and tables are preserved.
-6. **Geography Pack**: Master Data geo levels use the `ETH` country pack for platform compatibility, while Uganda settlement/district/zone/village attributes (`G01`–`G04`) use dedicated Uganda codelists.
-7. **Fictional Demo Data**: All 8 households (`HH-DEMO-0001..0008`) and 25 refugees (`RF-DEMO-0001..0025`) are fictional Uganda-context records.
+1. **Isolated Identity & Workflow Services**: Refugee Registry runs its own dedicated `refugee-postgres` (`5435`), `refugee-redis` (`6381`), `refugee-keycloak` (`8180`, realm `refugee`), `refugee-iam-staff-api` (`8120`), `refugee-awe` (`8130`), and `refugee-id-generator` (`8140`).
+2. **Remaining Shared Infra**: `refugee_registry_db` and `refugee_master_data_db` remain separate databases inside `openg2p-postgres` (`5433`), and `openg2p-minio` (`9000`) is shared for object storage buckets.
+3. **Uganda Code Lists vs. Illustrative Lists**: Lists on the `Code Lists` sheet match `Uganda_Refugee_Data_Attributes.xlsx`; settlement/site/programme lists are illustrative Uganda-context demo lists.
+4. **Biometrics Out of Scope**: Mandatory biometric attributes `C01`, `C02`, and `C05` are out of scope (`TODO` in `register_domain/models/refugee.py`).
+5. **Security Screening (`E07`) Read-Only & Plain Consent (`P01`/`P02`)**: `security_screening_status` is read-only; `informed_consent_given`/`partner_data_sharing_consent` are stored on `G2PRefugee` without Consent Manager / `data_scopes.json`.
+6. **Fictional Demo Data**: All 8 households (`HH-DEMO-0001..0008`) and 25 refugees (`RF-DEMO-0001..0025`) are fictional Uganda-context records.
