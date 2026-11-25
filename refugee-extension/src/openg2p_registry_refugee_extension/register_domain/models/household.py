@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 from openg2p_registry_core.models import (
     G2PGeo,
@@ -9,7 +9,7 @@ from openg2p_registry_core.models import (
 from openg2p_registry_core.models.g2p_intake_form import G2PIntakeForm
 from sqlalchemy import Boolean, Date, DateTime, Float, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, validates
 
 from ..services import G2PRegisterDomainServiceHousehold
 from .enums import (
@@ -76,6 +76,14 @@ class G2PHousehold:
     lifecycle_status: Mapped[RefugeeRecordStatusEnum] = mapped_column(String, nullable=True)  # Q01
     last_updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)  # Q04
     last_updated_by: Mapped[str] = mapped_column(String, nullable=True)  # Q04
+
+    @validates("last_updated_at")
+    def _coerce_last_updated_at(self, _key, value):
+        if value is None or value == "":
+            return datetime.now(timezone.utc).replace(tzinfo=None)
+        if isinstance(value, str):
+            return datetime.fromisoformat(value.replace("Z", "+00:00")).replace(tzinfo=None)
+        return value
 
 
 class G2PRegisterHousehold(G2PRegister, G2PGeo, G2PHousehold):
