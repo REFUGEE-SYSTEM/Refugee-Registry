@@ -78,7 +78,7 @@ with conn, conn.cursor() as cur:
         """)
         cur.execute("""
             INSERT INTO g2p_geo_version_units (version_no, unit_id, level_id, name, name_i18n, parent_unit_id, status, valid_from, valid_to)
-            SELECT 1, level_value_id, level_id, COALESCE(value_display, level_value_mnemonic, level_value_id),
+            SELECT 1, level_value_id, level_id, COALESCE(display_name, level_value_mnemonic, level_value_id),
                    display_name_i18n, parent_level_value_id, 'ACTIVE', valid_from, valid_to
             FROM g2p_geo_level_values
         """)
