@@ -324,30 +324,20 @@ def wait_idgen_pools() -> None:
     url = os.environ.get("IDGEN_INTERNAL_URL", "http://id-generator:8000")
     print(f"[bootstrap] Waiting for ID Generator pools at {url} ...")
     deadline = time.time() + 90
+    last_err: Exception | None = None
     while time.time() < deadline:
         try:
-            with urllib.request.urlopen(f"{url}/v1/idgenerator/health", timeout=5) as resp:
-                if resp.status == 200:
-                    conn = psycopg2.connect(
-                        host=os.environ.get("PGHOST", "postgres"),
-                        port=int(os.environ.get("PGPORT", "5432")),
-                        dbname="idgenerator",
-                        user=os.environ.get("POSTGRES_USER", "postgres"),
-                        password=os.environ["POSTGRES_PASSWORD"],
-                    )
-                    with conn, conn.cursor() as cur:
-                        cur.execute(
-                            "SELECT id_type, COUNT(*) FROM id_pool WHERE status = 'AVAILABLE' GROUP BY id_type"
-                        )
-                        counts = dict(cur.fetchall())
-                    conn.close()
-                    if counts.get("household", 0) > 0 and counts.get("refugee", 0) > 0:
-                        print(f"[bootstrap] ID Generator pools ready: {counts}")
-                        return
-        except Exception:
-            pass
+            hh = _req_json(f"{url}/v1/idgenerator/household/id", method="POST")
+            rf = _req_json(f"{url}/v1/idgenerator/refugee/id", method="POST")
+            hh_id = (hh or {}).get("id") or ((hh or {}).get("response") or {}).get("id")
+            rf_id = (rf or {}).get("id") or ((rf or {}).get("response") or {}).get("id")
+            if hh_id and rf_id:
+                print(f"[bootstrap] ID Generator pools ready (sample household={hh_id}, refugee={rf_id}).")
+                return
+        except Exception as exc:
+            last_err = exc
         time.sleep(3)
-    raise RuntimeError("Timed out waiting for ID Generator pools (household, refugee)")
+    raise RuntimeError(f"Timed out waiting for ID Generator pools (household, refugee): {last_err}")
 
 
 def bootstrap_minio() -> None:
