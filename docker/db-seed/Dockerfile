@@ -5,7 +5,7 @@ RUN rm -rf /seed/meta_data/* /seed/awe_meta_data/* /seed/templates/* /seed/seed-
 
 COPY refugee-extension/src/openg2p_registry_refugee_extension/meta_data/     /seed/meta_data/
 COPY refugee-extension/src/openg2p_registry_refugee_extension/awe_meta_data/ /seed/awe_meta_data/
-COPY refugee-extension/src/openg2p_registry_refugee_extension/templates/     /seed/templates/
+RUN mkdir -p /seed/templates
 
 COPY docker/db-seed/load_sample_data.py /seed/load_sample_data.py
 RUN chmod +x /seed/load_sample_data.py
