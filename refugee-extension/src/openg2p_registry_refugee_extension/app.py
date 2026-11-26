@@ -12,6 +12,8 @@ from openg2p_registry_core.app import Initializer as CoreInitializer
 from sqlalchemy import text
 from sqlalchemy.dialects import postgresql
 
+from .photo_support import install_photo_support
+
 from .register_domain.models import (
     G2PIntakeFormAddress,
     G2PIntakeFormDisplacementHistory,
@@ -95,6 +97,7 @@ class Initializer(BaseInitializer):
     def initialize(self, **kwargs):
         super().initialize()
         CoreInitializer().initialize()
+        install_photo_support()
 
         G2PRegisterDomainServiceRefugee()
         G2PRegisterDomainServiceIdentityDocument()

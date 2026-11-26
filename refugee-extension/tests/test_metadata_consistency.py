@@ -130,6 +130,8 @@ class MetadataConsistencyTests(unittest.TestCase):
                     self.assertIn(".", p, f"{section_id}: widget-data-path '{p}' missing register prefix")
                     reg_prefix, field = p.split(".", 1)
                     self.assertEqual(reg_prefix, section_reg_id)
+                    if widget.get("widget") == "header-section" and field == "record_image_url":
+                        continue
                     self.assertIn(
                         field,
                         columns,
