@@ -345,7 +345,28 @@ def wait_idgen_pools() -> None:
     raise RuntimeError("Timed out waiting for ID Generator pools (household, refugee)")
 
 
+def bootstrap_minio() -> None:
+    from minio import Minio
+
+    endpoint = os.environ.get("MINIO_ENDPOINT", "minio:9000")
+    access_key = os.environ.get("MINIO_ROOT_USER", "refugeeadmin")
+    secret_key = os.environ["MINIO_ROOT_PASSWORD"]
+    buckets = [
+        os.environ.get("MINIO_BUCKET_NAME", "default_bucket"),
+        "templates",
+        "registrant-photos",
+    ]
+    client = Minio(endpoint, access_key=access_key, secret_key=secret_key, secure=False)
+    for bucket in buckets:
+        if not client.bucket_exists(bucket):
+            client.make_bucket(bucket)
+            print(f"[bootstrap] Created MinIO bucket '{bucket}'.")
+        else:
+            print(f"[bootstrap] MinIO bucket '{bucket}' already exists.")
+
+
 def main() -> int:
+    bootstrap_minio()
     bootstrap_keycloak()
     bootstrap_iam()
     bootstrap_awe()

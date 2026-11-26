@@ -27,10 +27,7 @@ fi
 echo "[up] Building and starting standalone services ..."
 docker compose up -d --build --wait
 
-echo "[up] Initializing MinIO buckets ..."
-docker compose --profile bootstrap run --rm minio-init
-
-echo "[up] Bootstrapping Keycloak, IAM, AWE, and ID Generator ..."
+echo "[up] Bootstrapping MinIO, Keycloak, IAM, AWE, and ID Generator ..."
 docker compose --profile bootstrap run --rm --build bootstrap-core
 
 echo "[up] Seeding Master Data (ETH geo + refugee codelists) ..."
