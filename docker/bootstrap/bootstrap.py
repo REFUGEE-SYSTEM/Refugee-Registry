@@ -56,7 +56,9 @@ def _req_json(url: str, method: str = "GET", data=None, token: str | None = None
 
 def wait_for_table(dbname: str, table: str, timeout: int = 120) -> None:
     deadline = time.time() + timeout
+    last_err: Exception | None = None
     while time.time() < deadline:
+        conn = None
         try:
             conn = psycopg2.connect(
                 host=os.environ.get("PGHOST", "postgres"),
@@ -65,19 +67,20 @@ def wait_for_table(dbname: str, table: str, timeout: int = 120) -> None:
                 user=os.environ.get("POSTGRES_USER", "postgres"),
                 password=os.environ["POSTGRES_PASSWORD"],
             )
-            with conn, conn.cursor() as cur:
+            with conn.cursor() as cur:
                 cur.execute(
                     "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = %s",
                     (table,),
                 )
                 if cur.fetchone():
-                    conn.close()
                     return
-            conn.close()
-        except Exception:
-            pass
+        except Exception as exc:
+            last_err = exc
+        finally:
+            if conn is not None:
+                conn.close()
         time.sleep(2)
-    raise RuntimeError(f"Timed out waiting for {dbname}.{table}")
+    raise RuntimeError(f"Timed out waiting for {dbname}.{table}: {last_err}")
 
 
 def bootstrap_keycloak() -> None:
