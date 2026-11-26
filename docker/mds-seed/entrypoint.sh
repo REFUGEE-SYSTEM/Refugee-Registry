@@ -30,6 +30,25 @@ conn.close()
   sleep 2
 done
 
+echo "[mds-seed] Applying MDS schema migrations ..."
+python3 - <<'PY'
+import glob, os, psycopg2
+conn = psycopg2.connect(
+    host=os.environ["PGHOST"],
+    port=os.environ["PGPORT"],
+    dbname=os.environ.get("MD_PGDATABASE", "refugee_master_data_db"),
+    user=os.environ["PGUSER"],
+    password=os.environ["PGPASSWORD"],
+)
+conn.autocommit = True
+with conn.cursor() as cur:
+    for path in sorted(glob.glob("/opt/mds-seed/migrations/*.sql")):
+        print(f"[mds-seed] Applying {os.path.basename(path)} ...")
+        with open(path, encoding="utf-8") as f:
+            cur.execute(f.read())
+conn.close()
+PY
+
 echo "[mds-seed] Seeding ETH geo + refugee codelists into ${MD_DB} ..."
 python3 /opt/mds-seed/load_geo_pack.py \
   --pack "${PACK_DIR}" \

@@ -14,6 +14,7 @@ RUN git init /opt/openg2p-data \
     && git -C /opt/openg2p-data checkout FETCH_HEAD \
     && rm -rf /opt/openg2p-data/.git
 
+COPY migrations/ /opt/mds-seed/migrations/
 COPY load_geo_pack.py /opt/mds-seed/load_geo_pack.py
 COPY entrypoint.sh /opt/mds-seed/entrypoint.sh
 RUN chmod +x /opt/mds-seed/entrypoint.sh
