@@ -1,0 +1,71 @@
+{
+  "attribute_id": "DOCUMENT_ISSUER_TYPE",
+  "attribute_code": "DOCUMENT_ISSUER_TYPE",
+  "attribute_display": "Document Issuer Type",
+  "is_hierarchical": false,
+  "values": [
+    {
+      "value_id": "NATIONAL_GOVERNMENT",
+      "value_code": "NATIONAL_GOVERNMENT",
+      "value_display": "National Government",
+      "sort_order": 1,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "REGIONAL_GOVERNMENT",
+      "value_code": "REGIONAL_GOVERNMENT",
+      "value_display": "Regional Government",
+      "sort_order": 2,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "IMMIGRATION_AUTHORITY",
+      "value_code": "IMMIGRATION_AUTHORITY",
+      "value_display": "Immigration Authority",
+      "sort_order": 3,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "REFUGEE_AUTHORITY",
+      "value_code": "REFUGEE_AUTHORITY",
+      "value_display": "Refugee Affairs Authority",
+      "sort_order": 4,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "UNHCR",
+      "value_code": "UNHCR",
+      "value_display": "UNHCR",
+      "sort_order": 5,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "EMBASSY",
+      "value_code": "EMBASSY",
+      "value_display": "Embassy",
+      "sort_order": 6,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "CONSULATE",
+      "value_code": "CONSULATE",
+      "value_display": "Consulate",
+      "sort_order": 7,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "POLICE",
+      "value_code": "POLICE",
+      "value_display": "Police Authority",
+      "sort_order": 8,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "OTHER",
+      "value_code": "OTHER",
+      "value_display": "Other",
+      "sort_order": 9,
+      "display_i18n": {}
+    }
+  ]
+}

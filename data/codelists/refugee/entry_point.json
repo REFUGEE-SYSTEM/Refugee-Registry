@@ -1,0 +1,57 @@
+{
+  "attribute_id": "ENTRY_POINT",
+  "attribute_code": "ENTRY_POINT",
+  "attribute_display": "Point of Entry / Reception Centre",
+  "is_hierarchical": false,
+  "values": [
+    {
+      "value_id": "ELEGU",
+      "value_code": "ELEGU",
+      "value_display": "Elegu Border Point",
+      "sort_order": 1,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "ORABA",
+      "value_code": "ORABA",
+      "value_display": "Oraba Border Point",
+      "sort_order": 2,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "BUNAGANA",
+      "value_code": "BUNAGANA",
+      "value_display": "Bunagana Border Point",
+      "sort_order": 3,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "MPONDWE",
+      "value_code": "MPONDWE",
+      "value_display": "Mpondwe Border Point",
+      "sort_order": 4,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "CYANIKA",
+      "value_code": "CYANIKA",
+      "value_display": "Cyanika Border Point",
+      "sort_order": 5,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "KAMPALA_DESK",
+      "value_code": "KAMPALA_DESK",
+      "value_display": "Kampala Refugee Desk",
+      "sort_order": 6,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "OTHER",
+      "value_code": "OTHER",
+      "value_display": "Other",
+      "sort_order": 7,
+      "display_i18n": {}
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 import glob
 import importlib.util
 import json
+import os
 import re
 import sys
 import unittest
@@ -45,13 +46,18 @@ from openg2p_registry_refugee_extension.register_domain.models.enums import (
 EXT_ROOT = Path(__file__).resolve().parents[1]
 PKG_ROOT = EXT_ROOT / "src" / "openg2p_registry_refugee_extension"
 META_DIR = PKG_ROOT / "meta_data" / "register-metadata"
-WORKSPACE_ROOT = EXT_ROOT.parents[1]
-PACK_ETH = WORKSPACE_ROOT / "openg2p-data" / "packs" / "ETH"
+REFUGEE_CODELISTS_DIR = EXT_ROOT.parent / "data" / "codelists" / "refugee"
+_env_eth = os.environ.get("OPENG2P_DATA_ETH_PACK")
+_candidate_eth = Path(_env_eth) if _env_eth else (EXT_ROOT.parents[1] / "OPENG2P" / "openg2p-workspace" / "openg2p-data" / "packs" / "ETH")
+CORE_CODELISTS_DIR = _candidate_eth / "codelists" if (_candidate_eth / "codelists").is_dir() else None
 
 
 def _load_codelists() -> dict[str, dict]:
     codelists: dict[str, dict] = {}
-    for folder in (PACK_ETH / "codelists", PACK_ETH / "domains" / "refugee"):
+    folders = [REFUGEE_CODELISTS_DIR]
+    if CORE_CODELISTS_DIR is not None:
+        folders.insert(0, CORE_CODELISTS_DIR)
+    for folder in folders:
         for path in sorted(glob.glob(str(folder / "*.json"))):
             data = json.loads(Path(path).read_text(encoding="utf-8"))
             codelists[data["attribute_id"]] = data

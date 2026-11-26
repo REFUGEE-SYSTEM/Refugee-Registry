@@ -1,0 +1,85 @@
+{
+  "attribute_id": "SPECIFIC_NEED_CATEGORY",
+  "attribute_code": "SPECIFIC_NEED_CATEGORY",
+  "attribute_display": "Specific Needs Category",
+  "is_hierarchical": false,
+  "values": [
+    {
+      "value_id": "CHILD_AT_RISK",
+      "value_code": "CHILD_AT_RISK",
+      "value_display": "Child at risk",
+      "sort_order": 1,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "UNACCOMPANIED_OR_SEPARATED_CHILD",
+      "value_code": "UNACCOMPANIED_OR_SEPARATED_CHILD",
+      "value_display": "Unaccompanied or separated child",
+      "sort_order": 2,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "DISABILITY",
+      "value_code": "DISABILITY",
+      "value_display": "Disability",
+      "sort_order": 3,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "SERIOUS_MEDICAL_CONDITION",
+      "value_code": "SERIOUS_MEDICAL_CONDITION",
+      "value_display": "Serious medical condition",
+      "sort_order": 4,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "OLDER_PERSON_AT_RISK",
+      "value_code": "OLDER_PERSON_AT_RISK",
+      "value_display": "Older person at risk",
+      "sort_order": 5,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "SINGLE_PARENT_OR_CAREGIVER",
+      "value_code": "SINGLE_PARENT_OR_CAREGIVER",
+      "value_display": "Single parent or caregiver",
+      "sort_order": 6,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "WOMAN_AT_RISK",
+      "value_code": "WOMAN_AT_RISK",
+      "value_display": "Woman at risk",
+      "sort_order": 7,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "SGBV_SURVIVOR",
+      "value_code": "SGBV_SURVIVOR",
+      "value_display": "SGBV survivor",
+      "sort_order": 8,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "TORTURE_SURVIVOR",
+      "value_code": "TORTURE_SURVIVOR",
+      "value_display": "Torture survivor",
+      "sort_order": 9,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "SPECIFIC_LEGAL_PHYSICAL_PROTECTION_NEEDS",
+      "value_code": "SPECIFIC_LEGAL_PHYSICAL_PROTECTION_NEEDS",
+      "value_display": "Specific legal & physical protection needs",
+      "sort_order": 10,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "FAMILY_UNITY",
+      "value_code": "FAMILY_UNITY",
+      "value_display": "Family unity",
+      "sort_order": 11,
+      "display_i18n": {}
+    }
+  ]
+}

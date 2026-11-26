@@ -1,0 +1,106 @@
+{
+  "attribute_id": "COUNTRY",
+  "attribute_code": "COUNTRY",
+  "attribute_display": "Country",
+  "is_hierarchical": false,
+  "values": [
+    {
+      "value_id": "SSD",
+      "value_code": "SSD",
+      "value_display": "South Sudan",
+      "sort_order": 1,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "COD",
+      "value_code": "COD",
+      "value_display": "Democratic Republic of the Congo",
+      "sort_order": 2,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "SOM",
+      "value_code": "SOM",
+      "value_display": "Somalia",
+      "sort_order": 3,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "BDI",
+      "value_code": "BDI",
+      "value_display": "Burundi",
+      "sort_order": 4,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "ETH",
+      "value_code": "ETH",
+      "value_display": "Ethiopia",
+      "sort_order": 5,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "ERI",
+      "value_code": "ERI",
+      "value_display": "Eritrea",
+      "sort_order": 6,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "SDN",
+      "value_code": "SDN",
+      "value_display": "Sudan",
+      "sort_order": 7,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "UGA",
+      "value_code": "UGA",
+      "value_display": "Uganda",
+      "sort_order": 8,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "KEN",
+      "value_code": "KEN",
+      "value_display": "Kenya",
+      "sort_order": 9,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "RWA",
+      "value_code": "RWA",
+      "value_display": "Rwanda",
+      "sort_order": 10,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "TZA",
+      "value_code": "TZA",
+      "value_display": "Tanzania",
+      "sort_order": 11,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "YEM",
+      "value_code": "YEM",
+      "value_display": "Yemen",
+      "sort_order": 12,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "SYR",
+      "value_code": "SYR",
+      "value_display": "Syria",
+      "sort_order": 13,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "DJI",
+      "value_code": "DJI",
+      "value_display": "Djibouti",
+      "sort_order": 14,
+      "display_i18n": {}
+    }
+  ]
+}

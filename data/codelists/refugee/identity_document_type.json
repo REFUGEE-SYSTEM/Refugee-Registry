@@ -1,0 +1,78 @@
+{
+  "attribute_id": "IDENTITY_DOCUMENT_TYPE",
+  "attribute_code": "IDENTITY_DOCUMENT_TYPE",
+  "attribute_display": "Identity Document Type",
+  "is_hierarchical": false,
+  "values": [
+    {
+      "value_id": "ASYLUM_REGISTRATION_CARD",
+      "value_code": "ASYLUM_REGISTRATION_CARD",
+      "value_display": "Asylum Registration Card (Refugee Desk)",
+      "sort_order": 1,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "ASYLUM_SEEKER_CERTIFICATE",
+      "value_code": "ASYLUM_SEEKER_CERTIFICATE",
+      "value_display": "Asylum-seeker certificate (OPM, 3 months)",
+      "sort_order": 2,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "ASYLUM_CERTIFICATE_PENDING_APPEAL",
+      "value_code": "ASYLUM_CERTIFICATE_PENDING_APPEAL",
+      "value_display": "Asylum Certificate Pending Review / Appeal",
+      "sort_order": 3,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "REFUGEE_FAMILY_ATTESTATION",
+      "value_code": "REFUGEE_FAMILY_ATTESTATION",
+      "value_display": "Refugee Family Attestation",
+      "sort_order": 4,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "REFUGEE_ID_CARD",
+      "value_code": "REFUGEE_ID_CARD",
+      "value_display": "Refugee ID card (16+, 5 years)",
+      "sort_order": 5,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "NIRA_BIRTH_CERTIFICATE",
+      "value_code": "NIRA_BIRTH_CERTIFICATE",
+      "value_display": "NIRA birth certificate",
+      "sort_order": 6,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "REFUGEE_TRAVEL_DOCUMENT",
+      "value_code": "REFUGEE_TRAVEL_DOCUMENT",
+      "value_display": "Refugee travel document",
+      "sort_order": 7,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "COUNTRY_OF_ORIGIN_PASSPORT_ID",
+      "value_code": "COUNTRY_OF_ORIGIN_PASSPORT_ID",
+      "value_display": "Country-of-origin passport / ID",
+      "sort_order": 8,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "MARRIAGE_CERTIFICATE",
+      "value_code": "MARRIAGE_CERTIFICATE",
+      "value_display": "Marriage certificate",
+      "sort_order": 9,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "OTHER",
+      "value_code": "OTHER",
+      "value_display": "Other as per government",
+      "sort_order": 10,
+      "display_i18n": {}
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "attribute_id": "UNACCOMPANIED_CHILD",
+  "attribute_code": "UNACCOMPANIED_CHILD",
+  "attribute_display": "Unaccompanied or Separated Child",
+  "is_hierarchical": false,
+  "values": [
+    {
+      "value_id": "UNACCOMPANIED",
+      "value_code": "UNACCOMPANIED",
+      "value_display": "Unaccompanied",
+      "sort_order": 1,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "SEPARATED",
+      "value_code": "SEPARATED",
+      "value_display": "Separated",
+      "sort_order": 2,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "NO",
+      "value_code": "NO",
+      "value_display": "No",
+      "sort_order": 3,
+      "display_i18n": {}
+    }
+  ]
+}

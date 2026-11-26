@@ -1,0 +1,29 @@
+{
+  "attribute_id": "DUPLICATE_CHECK",
+  "attribute_code": "DUPLICATE_CHECK",
+  "attribute_display": "Duplicate Check Result",
+  "is_hierarchical": false,
+  "values": [
+    {
+      "value_id": "UNIQUE",
+      "value_code": "UNIQUE",
+      "value_display": "Unique",
+      "sort_order": 1,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "POSSIBLE_DUPLICATE",
+      "value_code": "POSSIBLE_DUPLICATE",
+      "value_display": "Possible duplicate",
+      "sort_order": 2,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "CONFIRMED_DUPLICATE",
+      "value_code": "CONFIRMED_DUPLICATE",
+      "value_display": "Confirmed duplicate",
+      "sort_order": 3,
+      "display_i18n": {}
+    }
+  ]
+}

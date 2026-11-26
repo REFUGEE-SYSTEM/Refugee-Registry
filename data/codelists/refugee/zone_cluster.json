@@ -1,0 +1,71 @@
+{
+  "attribute_id": "ZONE_CLUSTER",
+  "attribute_code": "ZONE_CLUSTER",
+  "attribute_display": "Zone / Cluster",
+  "is_hierarchical": false,
+  "values": [
+    {
+      "value_id": "ZONE_1",
+      "value_code": "ZONE_1",
+      "value_display": "Zone 1",
+      "sort_order": 1,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "ZONE_2",
+      "value_code": "ZONE_2",
+      "value_display": "Zone 2",
+      "sort_order": 2,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "ZONE_3",
+      "value_code": "ZONE_3",
+      "value_display": "Zone 3",
+      "sort_order": 3,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "ZONE_4",
+      "value_code": "ZONE_4",
+      "value_display": "Zone 4",
+      "sort_order": 4,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "ZONE_5",
+      "value_code": "ZONE_5",
+      "value_display": "Zone 5",
+      "sort_order": 5,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "BASE_CAMP",
+      "value_code": "BASE_CAMP",
+      "value_display": "Base Camp",
+      "sort_order": 6,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "RUBONDO",
+      "value_code": "RUBONDO",
+      "value_display": "Rubondo",
+      "sort_order": 7,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "KASHONGA",
+      "value_code": "KASHONGA",
+      "value_display": "Kashonga",
+      "sort_order": 8,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "URBAN_CENTRAL",
+      "value_code": "URBAN_CENTRAL",
+      "value_display": "Urban Central",
+      "sort_order": 9,
+      "display_i18n": {}
+    }
+  ]
+}

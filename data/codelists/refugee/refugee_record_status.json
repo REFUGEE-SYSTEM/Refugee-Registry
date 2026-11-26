@@ -1,0 +1,36 @@
+{
+  "attribute_id": "REFUGEE_RECORD_STATUS",
+  "attribute_code": "REFUGEE_RECORD_STATUS",
+  "attribute_display": "Record Status",
+  "is_hierarchical": false,
+  "values": [
+    {
+      "value_id": "ACTIVE",
+      "value_code": "ACTIVE",
+      "value_display": "Active",
+      "sort_order": 1,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "INACTIVE",
+      "value_code": "INACTIVE",
+      "value_display": "Inactive",
+      "sort_order": 2,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "SUSPENDED",
+      "value_code": "SUSPENDED",
+      "value_display": "Suspended",
+      "sort_order": 3,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "CLOSED",
+      "value_code": "CLOSED",
+      "value_display": "Closed",
+      "sort_order": 4,
+      "display_i18n": {}
+    }
+  ]
+}

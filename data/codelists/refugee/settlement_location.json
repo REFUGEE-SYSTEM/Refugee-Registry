@@ -1,0 +1,78 @@
+{
+  "attribute_id": "SETTLEMENT_LOCATION",
+  "attribute_code": "SETTLEMENT_LOCATION",
+  "attribute_display": "Settlement or Urban Location",
+  "is_hierarchical": false,
+  "values": [
+    {
+      "value_id": "BIDIBIDI",
+      "value_code": "BIDIBIDI",
+      "value_display": "Bidibidi Settlement",
+      "sort_order": 1,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "NAKIVALE",
+      "value_code": "NAKIVALE",
+      "value_display": "Nakivale Settlement",
+      "sort_order": 2,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "KYANGWALI",
+      "value_code": "KYANGWALI",
+      "value_display": "Kyangwali Settlement",
+      "sort_order": 3,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "KAMPALA_URBAN",
+      "value_code": "KAMPALA_URBAN",
+      "value_display": "Kampala Urban",
+      "sort_order": 4,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "ADJUMANI",
+      "value_code": "ADJUMANI",
+      "value_display": "Adjumani Settlements",
+      "sort_order": 5,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "RHINO_CAMP",
+      "value_code": "RHINO_CAMP",
+      "value_display": "Rhino Camp",
+      "sort_order": 6,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "IMVEPI",
+      "value_code": "IMVEPI",
+      "value_display": "Imvepi Settlement",
+      "sort_order": 7,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "KYAKA_II",
+      "value_code": "KYAKA_II",
+      "value_display": "Kyaka II Settlement",
+      "sort_order": 8,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "RWAMWANJA",
+      "value_code": "RWAMWANJA",
+      "value_display": "Rwamwanja Settlement",
+      "sort_order": 9,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "KIRYANDONGO",
+      "value_code": "KIRYANDONGO",
+      "value_display": "Kiryandongo Settlement",
+      "sort_order": 10,
+      "display_i18n": {}
+    }
+  ]
+}

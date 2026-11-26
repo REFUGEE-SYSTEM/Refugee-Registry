@@ -1,0 +1,172 @@
+name: ${COMPOSE_PROJECT_NAME:-openg2p-developer}
+
+services:
+  refugee-master-data-api:
+    image: ${REFUGEE_MASTER_DATA_API_IMAGE:-openg2p/master-data-api:develop}
+    container_name: openg2p-refugee-master-data-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      refugee-redis:
+        condition: service_healthy
+      refugee-iam-staff-api:
+        condition: service_healthy
+    env_file:
+      - ${REFUGEE_ENV_DIR:-./env}/master-data-api.env.example
+    environment:
+      MASTER_DATA_API_PORT: "8000"
+      GEN2_MASTER_DATA_API_PORT: "8000"
+      MASTER_DATA_API_AUTH_ENABLED: "false"
+      MASTER_DATA_API_AUTH_REDIS_URL: "redis://refugee-redis:6379/0"
+      MASTER_DATA_API_AUTH_PROVIDER_API_URL: "http://refugee-iam-staff-api:8000"
+      MASTER_DATA_API_KEYCLOAK_CLIENT_ID: "${REFUGEE_KEYCLOAK_CLIENT_ID:-refugee-registry-staff-portal}"
+      MASTER_DATA_API_AUTH_VERIFY_SSL: "false"
+    ports:
+      - "${REFUGEE_MASTER_DATA_API_PORT:-8049}:8000"
+    restart: unless-stopped
+
+  refugee-registry-staff-api:
+    image: ${REFUGEE_REGISTRY_STAFF_API_IMAGE:-openg2p-refugee-registry-staff-api:0.0.0-develop.716}
+    container_name: openg2p-refugee-registry-staff-api
+    extra_hosts:
+      - "localhost:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      refugee-redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      refugee-iam-staff-api:
+        condition: service_healthy
+      refugee-awe:
+        condition: service_healthy
+      refugee-master-data-api:
+        condition: service_started
+    env_file:
+      - ${REFUGEE_ENV_DIR:-./env}/staff-portal-api.env.example
+    environment:
+      STAFF_PORTAL_PORT: "8000"
+      REGISTRY_STAFF_PORTAL_API_APP_PORT: "8000"
+      REGISTRY_STAFF_PORTAL_API_AUTH_REDIS_URL: "redis://refugee-redis:6379/0"
+      REGISTRY_STAFF_PORTAL_API_REGISTRANT_AUTH_REDIS_URL: "redis://refugee-redis:6379/0"
+      KEYCLOAK_BASE_URL: "http://refugee-keycloak:8080"
+      APPROVER_RESOLVER_BASE_URL: "http://refugee-registry-staff-api:8000"
+      AWE_CALLBACK_SECRET_ID: "${AWE_CALLBACK_SECRET_ID:-CHANGE_ME}"
+      AWE_CALLBACK_CALLER_SERVICE: "${AWE_CALLBACK_CALLER_SERVICE:-refugee}"
+    ports:
+      - "${REFUGEE_REGISTRY_STAFF_API_PORT:-8071}:8000"
+    restart: unless-stopped
+
+  refugee-registry-celery-worker:
+    image: ${REFUGEE_REGISTRY_CELERY_IMAGE:-openg2p-refugee-registry-celery:0.0.0-develop.716}
+    container_name: openg2p-refugee-registry-celery-worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      refugee-redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      refugee-registry-staff-api:
+        condition: service_started
+    environment:
+      CELERY_APP: openg2p_registry_celery_worker.main.celery_app
+      CELERY_OPTS: worker -Q refugee_registry_worker_queue --loglevel=info
+      REGISTRY_CELERY_WORKERS_CELERY_BROKER_URL: "redis://refugee-redis:6379/7"
+      REGISTRY_CELERY_WORKERS_CELERY_BACKEND_URL: "redis://refugee-redis:6379/7"
+    env_file:
+      - ${REFUGEE_ENV_DIR:-./env}/celery-workers.env.example
+    restart: unless-stopped
+
+  refugee-registry-celery-beat:
+    image: ${REFUGEE_REGISTRY_CELERY_IMAGE:-openg2p-refugee-registry-celery:0.0.0-develop.716}
+    container_name: openg2p-refugee-registry-celery-beat
+    depends_on:
+      postgres:
+        condition: service_healthy
+      refugee-redis:
+        condition: service_healthy
+      refugee-registry-staff-api:
+        condition: service_started
+    environment:
+      CELERY_APP: openg2p_registry_celery_beat.main.celery_app
+      CELERY_OPTS: worker --beat -Q celery --loglevel=info --schedule=/tmp/celery-beat-schedule.db
+      REGISTRY_CELERY_BEAT_CELERY_BROKER_URL: "redis://refugee-redis:6379/7"
+      REGISTRY_CELERY_BEAT_CELERY_BACKEND_URL: "redis://refugee-redis:6379/7"
+    env_file:
+      - ${REFUGEE_ENV_DIR:-./env}/celery-beat.env.example
+    restart: unless-stopped
+
+  refugee-registry-staff-ui:
+    image: ${REFUGEE_REGISTRY_STAFF_UI_IMAGE:-openg2p-farmer-custom-staff-ui:0.0.0-develop.716}
+    container_name: openg2p-refugee-registry-staff-ui
+    depends_on:
+      refugee-registry-staff-api:
+        condition: service_started
+      refugee-master-data-api:
+        condition: service_started
+      refugee-iam-staff-api:
+        condition: service_healthy
+    env_file:
+      - ${REFUGEE_ENV_DIR:-./env}/staff-portal-ui.env.example
+    ports:
+      - "${REFUGEE_REGISTRY_UI_PORT:-3050}:3000"
+    restart: unless-stopped
+
+  refugee-registry-db-seed:
+    profiles: [refugee-seed]
+    image: ${REFUGEE_REGISTRY_DB_SEED_IMAGE:-openg2p-refugee-registry-db-seed:0.0.0-develop.716}
+    container_name: openg2p-refugee-registry-db-seed
+    extra_hosts:
+      - "localhost:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGDATABASE: ${REFUGEE_REGISTRY_DB:-refugee_registry_db}
+      PGUSER: ${POSTGRES_SUPERUSER:-postgres}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-CHANGE_ME}
+      MD_PGHOST: postgres
+      MD_PGPORT: 5432
+      MD_PGDATABASE: ${REFUGEE_MASTER_DATA_DB:-refugee_master_data_db}
+      MD_PGUSER: ${POSTGRES_SUPERUSER:-postgres}
+      MD_PGPASSWORD: ${POSTGRES_PASSWORD:-CHANGE_ME}
+      AWE_DB_SEED_ENABLED: ${AWE_DB_SEED_ENABLED:-true}
+      AWE_PGHOST: refugee-postgres
+      AWE_PGPORT: 5432
+      AWE_PGDATABASE: awe
+      AWE_PGUSER: ${POSTGRES_SUPERUSER:-postgres}
+      AWE_PGPASSWORD: ${POSTGRES_PASSWORD:-CHANGE_ME}
+      AWE_CALLBACK_SECRET_ID: "${AWE_CALLBACK_SECRET_ID:-CHANGE_ME}"
+      AWE_CALLBACK_HMAC_SECRET: "${AWE_REGISTRY_CALLBACK_HMAC_SECRET:-CHANGE_ME}"
+      AWE_CALLBACK_CALLER_SERVICE: "${AWE_CALLBACK_CALLER_SERVICE:-refugee}"
+      KEYCLOAK_BASE_URL: http://refugee-keycloak:8080
+      APPROVER_RESOLVER_BASE_URL: http://refugee-registry-staff-api:8000
+      APPROVER_RESOLVER_SECRET: "${APPROVER_RESOLVER_SECRET:-CHANGE_ME}"
+      MDS_API_URL: http://refugee-master-data-api:8000
+      MDS_TOKEN_URL: http://localhost:${REFUGEE_KEYCLOAK_PORT:-8180}/realms/${REFUGEE_KEYCLOAK_REALM:-refugee}/protocol/openid-connect/token
+      MDS_CLIENT_ID: awe-admin-resolver
+      MDS_CLIENT_SECRET: "${KEYCLOAK_AWE_RESOLVER_CLIENT_SECRET:-CHANGE_ME}"
+      LOAD_SAMPLE_DATA: "${LOAD_SAMPLE_DATA:-true}"
+      LOAD_GEO_DATA: "false"
+      LOAD_ETHIOPIA_GEO: "false"
+      LOAD_CODE_LISTS: "false"
+      LOAD_IMAGES: "false"
+      LOAD_TEMPLATES: "false"
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-CHANGE_ME}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-CHANGE_ME}
+      MINIO_SECURE: "false"
+      TEMPLATE_BUCKET_NAME: templates
+      IMAGE_BUCKET_NAME: registrant-photos
+    restart: "no"
+
+networks:
+  default:
+    name: ${DEVELOPER_NETWORK:-openg2p-developer_default}
+    external: true

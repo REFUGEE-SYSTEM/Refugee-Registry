@@ -1,0 +1,29 @@
+{
+  "attribute_id": "SECURITY_SCREENING",
+  "attribute_code": "SECURITY_SCREENING",
+  "attribute_display": "Security Screening Cleared",
+  "is_hierarchical": false,
+  "values": [
+    {
+      "value_id": "CLEARED",
+      "value_code": "CLEARED",
+      "value_display": "Cleared",
+      "sort_order": 1,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "PENDING",
+      "value_code": "PENDING",
+      "value_display": "Pending",
+      "sort_order": 2,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "REFERRED",
+      "value_code": "REFERRED",
+      "value_display": "Referred",
+      "sort_order": 3,
+      "display_i18n": {}
+    }
+  ]
+}

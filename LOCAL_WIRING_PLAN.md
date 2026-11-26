@@ -9,7 +9,7 @@
   - `refugee_master_data_db` (with `pg_trgm`)
 - **Keycloak Client & IAM Application**: `refugee-registry-staff-portal` (`http://localhost:3050`)
 - **Worker Queue & Redis DB**: `refugee_registry_worker_queue`, `redis://redis:6379/7`
-- **AWE Callback Secret**: `00000000-0000-4000-8000-000000000005` (`caller_service = refugee`)
+- **AWE Callback Secret**: `<AWE_CALLBACK_SECRET_ID>` (`caller_service = refugee`)
 
 ## 2. Files Created Inside `refugee-registry/`
 - `.openg2p-extension.yaml` (extension manifest for `openg2p-developer`)

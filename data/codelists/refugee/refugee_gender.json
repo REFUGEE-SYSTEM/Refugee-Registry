@@ -1,0 +1,22 @@
+{
+  "attribute_id": "REFUGEE_GENDER",
+  "attribute_code": "REFUGEE_GENDER",
+  "attribute_display": "Sex",
+  "is_hierarchical": false,
+  "values": [
+    {
+      "value_id": "MALE",
+      "value_code": "MALE",
+      "value_display": "Male",
+      "sort_order": 1,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "FEMALE",
+      "value_code": "FEMALE",
+      "value_display": "Female",
+      "sort_order": 2,
+      "display_i18n": {}
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "attribute_id": "DELIVERY_MODALITY",
+  "attribute_code": "DELIVERY_MODALITY",
+  "attribute_display": "Delivery Modality",
+  "is_hierarchical": false,
+  "values": [
+    {
+      "value_id": "CASH",
+      "value_code": "CASH",
+      "value_display": "Cash",
+      "sort_order": 1,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "IN_KIND_FOOD",
+      "value_code": "IN_KIND_FOOD",
+      "value_display": "In-kind food",
+      "sort_order": 2,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "VOUCHER",
+      "value_code": "VOUCHER",
+      "value_display": "Voucher",
+      "sort_order": 3,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "MIXED",
+      "value_code": "MIXED",
+      "value_display": "Mixed",
+      "sort_order": 4,
+      "display_i18n": {}
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "attribute_id": "RELIGION",
+  "attribute_code": "RELIGION",
+  "attribute_display": "Religion",
+  "is_hierarchical": false,
+  "values": [
+    {
+      "value_id": "CHRISTIANITY",
+      "value_code": "CHRISTIANITY",
+      "value_display": "Christianity",
+      "sort_order": 1,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "ISLAM",
+      "value_code": "ISLAM",
+      "value_display": "Islam",
+      "sort_order": 2,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "TRADITIONAL",
+      "value_code": "TRADITIONAL",
+      "value_display": "Traditional / Indigenous Beliefs",
+      "sort_order": 3,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "HINDUISM",
+      "value_code": "HINDUISM",
+      "value_display": "Hinduism",
+      "sort_order": 4,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "BUDDHISM",
+      "value_code": "BUDDHISM",
+      "value_display": "Buddhism",
+      "sort_order": 5,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "OTHER",
+      "value_code": "OTHER",
+      "value_display": "Other",
+      "sort_order": 6,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "NONE",
+      "value_code": "NONE",
+      "value_display": "No Religion",
+      "sort_order": 7,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "PREFER_NOT_TO_SAY",
+      "value_code": "PREFER_NOT_TO_SAY",
+      "value_display": "Prefer Not to Say",
+      "sort_order": 8,
+      "display_i18n": {}
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "attribute_id": "AUTH_RESULT",
+  "attribute_code": "AUTH_RESULT",
+  "attribute_display": "Authentication Method & Result",
+  "is_hierarchical": false,
+  "values": [
+    {
+      "value_id": "FINGERPRINT_OK",
+      "value_code": "FINGERPRINT_OK",
+      "value_display": "Fingerprint OK",
+      "sort_order": 1,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "IRIS_OK",
+      "value_code": "IRIS_OK",
+      "value_display": "Iris OK",
+      "sort_order": 2,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "MANUAL_OVERRIDE",
+      "value_code": "MANUAL_OVERRIDE",
+      "value_display": "Manual override",
+      "sort_order": 3,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "FAILED",
+      "value_code": "FAILED",
+      "value_display": "Failed",
+      "sort_order": 4,
+      "display_i18n": {}
+    }
+  ]
+}

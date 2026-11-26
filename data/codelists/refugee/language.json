@@ -1,0 +1,92 @@
+{
+  "attribute_id": "LANGUAGE",
+  "attribute_code": "LANGUAGE",
+  "attribute_display": "Preferred Language(s)",
+  "is_hierarchical": false,
+  "values": [
+    {
+      "value_id": "JUBA_ARABIC",
+      "value_code": "JUBA_ARABIC",
+      "value_display": "Juba Arabic",
+      "sort_order": 1,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "BARI",
+      "value_code": "BARI",
+      "value_display": "Bari",
+      "sort_order": 2,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "DINKA",
+      "value_code": "DINKA",
+      "value_display": "Dinka",
+      "sort_order": 3,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "NUER",
+      "value_code": "NUER",
+      "value_display": "Nuer",
+      "sort_order": 4,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "KISWAHILI",
+      "value_code": "KISWAHILI",
+      "value_display": "Kiswahili",
+      "sort_order": 5,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "LINGALA",
+      "value_code": "LINGALA",
+      "value_display": "Lingala",
+      "sort_order": 6,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "KINYARWANDA",
+      "value_code": "KINYARWANDA",
+      "value_display": "Kinyarwanda",
+      "sort_order": 7,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "FRENCH",
+      "value_code": "FRENCH",
+      "value_display": "French",
+      "sort_order": 8,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "ARABIC",
+      "value_code": "ARABIC",
+      "value_display": "Arabic",
+      "sort_order": 9,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "ENGLISH",
+      "value_code": "ENGLISH",
+      "value_display": "English",
+      "sort_order": 10,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "SOMALI",
+      "value_code": "SOMALI",
+      "value_display": "Somali",
+      "sort_order": 11,
+      "display_i18n": {}
+    },
+    {
+      "value_id": "TIGRINYA",
+      "value_code": "TIGRINYA",
+      "value_display": "Tigrinya",
+      "sort_order": 12,
+      "display_i18n": {}
+    }
+  ]
+}
