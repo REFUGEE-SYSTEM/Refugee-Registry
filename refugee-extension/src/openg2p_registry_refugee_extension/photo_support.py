@@ -94,14 +94,13 @@ def _extract_photo_doc_id(documents) -> str | None:
 
 
 def _patch_intake_and_register_photo_sync() -> None:
-    from openg2p_registry_core.services.g2p_document_service import G2PDocumentService
     from openg2p_registry_core.services.g2p_register_service import G2PRegisterService
-    from openg2p_registry_core.services.intake_form_data_service import IntakeFormDataService
+    from openg2p_registry_core.services.intake_form_data_service import G2PIntakeFormDataService
 
     refugee_reg_id = REGISTER_IDS["Refugee"]
 
-    orig_upsert_sub_docs = IntakeFormDataService._upsert_submission_section_documents
-    orig_upsert_live_docs = IntakeFormDataService._upsert_live_documents
+    orig_upsert_sub_docs = G2PIntakeFormDataService._upsert_submission_section_documents
+    orig_upsert_live_docs = G2PIntakeFormDataService._upsert_live_documents
 
     async def patched_upsert_sub_docs(self, submission, section_id, documents, session):
         await orig_upsert_sub_docs(self, submission, section_id, documents, session)
@@ -133,8 +132,8 @@ def _patch_intake_and_register_photo_sync() -> None:
                 {"doc_id": photo_id, "rec_id": str(internal_record_id)},
             )
 
-    IntakeFormDataService._upsert_submission_section_documents = patched_upsert_sub_docs
-    IntakeFormDataService._upsert_live_documents = patched_upsert_live_docs
+    G2PIntakeFormDataService._upsert_submission_section_documents = patched_upsert_sub_docs
+    G2PIntakeFormDataService._upsert_live_documents = patched_upsert_live_docs
 
     if hasattr(G2PRegisterService, "get_record_data"):
         orig_get_record_data = G2PRegisterService.get_record_data
