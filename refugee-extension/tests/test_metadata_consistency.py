@@ -48,8 +48,8 @@ PKG_ROOT = EXT_ROOT / "src" / "openg2p_registry_refugee_extension"
 META_DIR = PKG_ROOT / "meta_data" / "register-metadata"
 REFUGEE_CODELISTS_DIR = EXT_ROOT.parent / "data" / "codelists" / "refugee"
 _env_eth = os.environ.get("OPENG2P_DATA_ETH_PACK")
-_candidate_eth = Path(_env_eth) if _env_eth else (EXT_ROOT.parents[1] / "OPENG2P" / "openg2p-workspace" / "openg2p-data" / "packs" / "ETH")
-CORE_CODELISTS_DIR = _candidate_eth / "codelists" if (_candidate_eth / "codelists").is_dir() else None
+_candidate_eth = Path(_env_eth) if _env_eth else None
+CORE_CODELISTS_DIR = (_candidate_eth / "codelists") if (_candidate_eth and (_candidate_eth / "codelists").is_dir()) else None
 
 
 def _load_codelists() -> dict[str, dict]:
@@ -150,6 +150,8 @@ class MetadataConsistencyTests(unittest.TestCase):
                         ds = col.get("widget-data-source") or {}
                         attr_id = (ds.get("params") or {}).get("attribute_id")
                         if attr_id:
+                            if CORE_CODELISTS_DIR is None and attr_id not in codelists:
+                                continue
                             self.assertIn(
                                 attr_id,
                                 codelists,
@@ -158,6 +160,8 @@ class MetadataConsistencyTests(unittest.TestCase):
                 ds = widget.get("widget-data-source") or {}
                 attr_id = (ds.get("params") or {}).get("attribute_id")
                 if attr_id:
+                    if CORE_CODELISTS_DIR is None and attr_id not in codelists:
+                        continue
                     self.assertIn(
                         attr_id,
                         codelists,
@@ -193,6 +197,8 @@ class MetadataConsistencyTests(unittest.TestCase):
             "EXIT_REASON": ExitReasonEnum,
         }
         for attr_id, enum_cls in bindings.items():
+            if CORE_CODELISTS_DIR is None and attr_id not in codelists:
+                continue
             self.assertEqual(
                 {e.value for e in enum_cls},
                 _codes(codelists[attr_id]),

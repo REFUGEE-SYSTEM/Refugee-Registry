@@ -24,40 +24,36 @@ A domain registry for refugee household and individual case management, built as
 
 ## Architecture & Prerequisites
 
-- **Pinned Platform Version (`RP_VERSION`)**: `0.0.0-develop.716` (configured in `docker/*/Dockerfile` and `.env.example`; override with `--build-arg RP_VERSION=<tag>` when rebuilding images).
-- **Developer Stack Dependency**: Requires an OpenG2P developer stack (`openg2p-developer`) providing `infra` + `commons` services (PostgreSQL, MinIO, Docker network).
-- **Isolated Refugee Services** (`deploy/local/docker-compose.refugee-services.yml`): Dedicated `refugee-postgres` (`5435`), `refugee-redis` (`6381`), `refugee-keycloak` (`8180`, realm `refugee`), `refugee-iam-staff-api` (`8120`), `refugee-awe` (`8130`), and `refugee-id-generator` (`8140`).
+- **Pinned Platform Version (`RP_VERSION`)**: `0.0.0-develop.716` (configured in `docker/*/Dockerfile` and `.env.example`).
+- **Standalone Stack**: Self-contained root `docker-compose.yml` runs PostgreSQL, Redis, MinIO, Keycloak (realm `refugee`), IAM Staff Portal API, AWE, ID Generator, Master Data API, Refugee Staff API, Celery Worker & Beat, and Staff UI — with zero dependency on `openg2p-developer` or external workspaces.
+- See [docs/standalone/ARCHITECTURE.md](docs/standalone/ARCHITECTURE.md), [docs/standalone/DEPENDENCY_AUDIT.md](docs/standalone/DEPENDENCY_AUDIT.md), and [docs/standalone/TROUBLESHOOTING.md](docs/standalone/TROUBLESHOOTING.md) for details.
 
 ---
 
-## Quick Start
+## Quick Start (Standalone)
 
-1. **Copy configuration templates and set secrets** (replace every `CHANGE_ME` value):
+Requires only **Docker** (with Compose v2) and **git**.
+
+1. **Generate `.env` with random secrets**:
    ```bash
-   cp .env.example .env
+   ./scripts/init-env.sh
    ```
-2. **Install compose & env templates into `openg2p-developer`**:
+2. **Start, bootstrap, and seed the full stack** (set `LOAD_SAMPLE_DATA=false` in `.env` to skip demo records):
    ```bash
-   ./scripts/install-into-developer-stack.sh /path/to/openg2p-developer
+   ./scripts/up.sh
    ```
-   Copy the `*.example` files in `generated/refugee-registry/` to `*.env` / `*.yaml` / `*.json` with real local values.
-3. **Build refugee images**:
+3. **Verify everything is healthy**:
    ```bash
-   docker build -t openg2p-refugee-registry-staff-api:0.0.0-develop.716 -f docker/staff-api/Dockerfile .
-   docker build -t openg2p-refugee-registry-celery:0.0.0-develop.716 -f docker/celery/Dockerfile .
-   docker build -t openg2p-refugee-registry-db-seed:0.0.0-develop.716 -f docker/db-seed/Dockerfile .
+   ./scripts/smoke-test.sh
    ```
-4. **Start & seed**:
-   ```bash
-   export OPENG2P_DEVELOPER_DIR=/path/to/openg2p-developer
-   ./scripts/start.sh
-   # Provision Keycloak realm/clients/users and IAM roles/permissions:
-   python3 scripts/init-refugee-keycloak.py
-   python3 scripts/init-refugee-iam.py
-   ```
-   - Staff Portal UI: `http://localhost:3050/en`
-   - Staff API OpenAPI: `http://localhost:8071/openapi.json`
-   - Refugee Master Data API: `http://localhost:8049/openapi.json`
+   - Staff Portal UI: `http://localhost:3150/en` (demo login: `staff`, password in `.env` `REFUGEE_DEMO_USER_PASSWORD`)
+   - Staff API OpenAPI: `http://localhost:8271/docs`
+   - Master Data API OpenAPI: `http://localhost:8249/docs`
+   - Keycloak Admin: `http://localhost:8280`
+4. **Stop or reset**:
+   - `./scripts/down.sh` — stop containers (keeps data volumes)
+   - `./scripts/reset.sh --yes` — wipe volumes and re-seed from scratch
+   - `./scripts/status.sh` / `./scripts/logs.sh [service]` — inspect status and logs
    - **Local demo only** users: `staff` (registrar), `alex.carter` (approver), `nina.patel` (registrar).
 
 ---
