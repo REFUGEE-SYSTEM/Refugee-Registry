@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-ARG OPENG2P_DATA_SHA=122275845b38729e508480539cf35dd67b4c804e
+ARG OPENG2P_DATA_SHA=302ac29c91c87b32ceb80d6da1e04043cbc82d92
 
 RUN apt-get update && apt-get install -y --no-install-recommends git \
     && rm -rf /var/lib/apt/lists/* \
