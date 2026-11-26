@@ -1,4 +1,0 @@
-# Add under id_generator.id_types in openg2p-developer/config/id-generator/default.yaml
-# (Only needed if using the shared id-generator instead of the isolated refugee-id-generator)
-    refugee:
-      id_length: 12

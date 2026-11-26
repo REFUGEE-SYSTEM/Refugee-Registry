@@ -25,7 +25,10 @@ A domain registry for refugee household and individual case management, built as
 ## Architecture & Prerequisites
 
 - **Pinned Platform Version (`RP_VERSION`)**: `0.0.0-develop.716` (configured in `docker/*/Dockerfile` and `.env.example`).
-- **Standalone Stack**: Self-contained root `docker-compose.yml` runs PostgreSQL, Redis, MinIO, Keycloak (realm `refugee`), IAM Staff Portal API, AWE, ID Generator, Master Data API, Refugee Staff API, Celery Worker & Beat, and Staff UI — with zero dependency on `openg2p-developer` or external workspaces.
+- **Measured Footprint & Startup**:
+  - **Cold-start time-to-ready** (`./scripts/up.sh` including image build, healthchecks, and all bootstrap/seed jobs): **~106.5 s** (~1.8 min, with base images cached).
+  - **Total steady-state memory** (`docker stats --no-stream` across all 12 running containers): **~3.0 GiB** (`3,059 MiB`; largest consumers: `celery-worker` `654.9 MiB`, `keycloak` `642.7 MiB`, `celery-beat` `518.8 MiB`, `staff-api` `445.4 MiB`, `master-data-api` `199.0 MiB`, `iam-staff-api` `161.7 MiB`, `awe` `149.2 MiB`, `postgres` `118.5 MiB`, `id-generator` `57.8 MiB`, `minio` `57.0 MiB`, `staff-ui` `49.6 MiB`, `redis` `4.0 MiB`).
+- **Standalone Stack**: Self-contained root `docker-compose.yml` runs PostgreSQL, Redis, MinIO, Keycloak (realm `refugee`), IAM Staff Portal API, AWE, ID Generator, Master Data API, Refugee Staff API, Celery Worker & Beat, and Staff UI — with zero dependency on external workspaces. (Optional migration notes: [docs/migration-from-developer-stack.md](docs/migration-from-developer-stack.md).)
 - See [docs/standalone/ARCHITECTURE.md](docs/standalone/ARCHITECTURE.md), [docs/standalone/DEPENDENCY_AUDIT.md](docs/standalone/DEPENDENCY_AUDIT.md), and [docs/standalone/TROUBLESHOOTING.md](docs/standalone/TROUBLESHOOTING.md) for details.
 
 ---
