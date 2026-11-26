@@ -6,6 +6,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import subprocess
 import sys
 import time
 import urllib.error
@@ -242,7 +243,8 @@ async def _register_iam_app() -> None:
 
 
 def bootstrap_iam() -> None:
-    print("[bootstrap] Waiting for IAM tables ...")
+    print("[bootstrap] Running IAM DB migrations ...")
+    subprocess.run([sys.executable, "-m", "iam_staff_portal_api.main", "migrate"], check=True)
     wait_for_table("iam_staff", "staff_portal_applications")
     wait_for_table("iam_staff", "login_providers")
     asyncio.run(_register_iam_app())
