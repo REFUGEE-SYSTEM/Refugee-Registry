@@ -32,12 +32,16 @@ if [[ ! -f .env || "$FORCE" == "true" ]]; then
   cp .env.example .env
   python3 - <<'PY'
 import secrets
+import uuid
 from pathlib import Path
 
 env_path = Path(".env")
 lines = []
 for line in env_path.read_text(encoding="utf-8").splitlines():
-    if "=CHANGE_ME" in line:
+    if "=CHANGE_ME_UUID" in line:
+        key = line.split("=", 1)[0]
+        lines.append(f"{key}={uuid.uuid4()}")
+    elif "=CHANGE_ME" in line:
         key = line.split("=", 1)[0]
         if key == "REFUGEE_DEMO_USER_PASSWORD":
             val = secrets.token_urlsafe(12)
