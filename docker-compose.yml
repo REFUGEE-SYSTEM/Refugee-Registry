@@ -530,6 +530,8 @@ services:
       dockerfile: docker/db-seed/Dockerfile
       args:
         RP_VERSION: ${RP_VERSION:-0.0.0-develop.716}
+    extra_hosts:
+      - "localhost:host-gateway"
     depends_on:
       postgres:
         condition: service_healthy
@@ -565,7 +567,7 @@ services:
       APPROVER_RESOLVER_BASE_URL: "http://staff-api:8000"
       APPROVER_RESOLVER_SECRET: ${APPROVER_RESOLVER_SECRET:?APPROVER_RESOLVER_SECRET is required}
       MDS_API_URL: "http://master-data-api:8000"
-      MDS_TOKEN_URL: "http://keycloak:8080/realms/${REFUGEE_KEYCLOAK_REALM:-refugee}/protocol/openid-connect/token"
+      MDS_TOKEN_URL: "http://localhost:${REFUGEE_KEYCLOAK_PORT:-8280}/realms/${REFUGEE_KEYCLOAK_REALM:-refugee}/protocol/openid-connect/token"
       MDS_CLIENT_ID: awe-admin-resolver
       MDS_CLIENT_SECRET: ${KEYCLOAK_AWE_RESOLVER_CLIENT_SECRET:?KEYCLOAK_AWE_RESOLVER_CLIENT_SECRET is required}
       LOAD_SAMPLE_DATA: ${LOAD_SAMPLE_DATA:-true}
