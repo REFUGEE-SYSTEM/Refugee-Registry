@@ -329,8 +329,8 @@ def wait_idgen_pools() -> None:
         try:
             hh = _req_json(f"{url}/v1/idgenerator/household/id", method="POST")
             rf = _req_json(f"{url}/v1/idgenerator/refugee/id", method="POST")
-            hh_id = (hh or {}).get("id") or ((hh or {}).get("response") or {}).get("id")
-            rf_id = (rf or {}).get("id") or ((rf or {}).get("response") or {}).get("id")
+            hh_id = ((hh or {}).get("response") or {}).get("id") or (hh or {}).get("id")
+            rf_id = ((rf or {}).get("response") or {}).get("id") or (rf or {}).get("id")
             if hh_id and rf_id:
                 print(f"[bootstrap] ID Generator pools ready (sample household={hh_id}, refugee={rf_id}).")
                 return

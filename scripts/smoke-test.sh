@@ -62,8 +62,8 @@ else
 fi
 
 # 2. ID Generator allocation test
-hh_id="$(curl -s -X POST "http://localhost:${REFUGEE_IDGEN_PORT:-8240}/v1/idgenerator/household/id" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('id') or d.get('response',{}).get('id',''))" 2>/dev/null || true)"
-rf_id="$(curl -s -X POST "http://localhost:${REFUGEE_IDGEN_PORT:-8240}/v1/idgenerator/refugee/id" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('id') or d.get('response',{}).get('id',''))" 2>/dev/null || true)"
+hh_id="$(curl -s -X POST "http://localhost:${REFUGEE_IDGEN_PORT:-8240}/v1/idgenerator/household/id" | python3 -c "import sys,json; d=json.load(sys.stdin); print((d.get('response') or {}).get('id') or d.get('id',''))" 2>/dev/null || true)"
+rf_id="$(curl -s -X POST "http://localhost:${REFUGEE_IDGEN_PORT:-8240}/v1/idgenerator/refugee/id" | python3 -c "import sys,json; d=json.load(sys.stdin); print((d.get('response') or {}).get('id') or d.get('id',''))" 2>/dev/null || true)"
 [[ ${#hh_id} -eq 10 ]] && pass "IDGen household ID allocated: $hh_id" || fail "IDGen household ID invalid: '$hh_id'"
 [[ ${#rf_id} -eq 12 ]] && pass "IDGen refugee ID allocated: $rf_id" || fail "IDGen refugee ID invalid: '$rf_id'"
 
