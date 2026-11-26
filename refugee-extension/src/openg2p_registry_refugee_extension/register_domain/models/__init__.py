@@ -21,13 +21,7 @@ from .enums import (
     LegalStatusEnum,
     NeedCategoryEnum,
     NeedSeverityEnum,
-    RelationshipToGroupEnum,
     ReligionEnum,
-)
-from .household import (
-    G2PIntakeFormHousehold,
-    G2PRegisterHistoryHousehold,
-    G2PRegisterHousehold,
 )
 from .identity_document import (
     G2PIntakeFormIdentityDocument,

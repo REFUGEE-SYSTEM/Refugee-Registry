@@ -10,14 +10,3 @@ from .g2p_individual_enricher_services import (
     G2PUndpIndividualUpdateEnricherService,
     G2PUndpIndividualDeleteEnricherService,
 )
-from .g2p_household_enricher_services import (
-    G2PDciHouseholdCreateEnricherService,
-    G2PDciHouseholdUpdateEnricherService,
-    G2PDciHouseholdDeleteEnricherService,
-    G2PSpdciHouseholdCreateEnricherService,
-    G2PSpdciHouseholdUpdateEnricherService,
-    G2PSpdciHouseholdDeleteEnricherService,
-    G2PUndpHouseholdCreateEnricherService,
-    G2PUndpHouseholdUpdateEnricherService,
-    G2PUndpHouseholdDeleteEnricherService,
-)

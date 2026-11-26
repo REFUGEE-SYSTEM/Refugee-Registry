@@ -1,6 +1,6 @@
 # Refugee Registry (OpenG2P Domain Extension)
 
-A domain registry for refugee household and individual case management, built as an extension of the **OpenG2P Registry Platform** (`openg2p-registry-core`). It models the **55 non-biometric Mandatory attributes** of the Uganda Refugee Data Attributes specification across a category-per-tab Staff Portal UI.
+A domain registry for individual refugee registration and case management, built as an extension of the **OpenG2P Registry Platform** (`openg2p-registry-core`). It models the individual non-biometric Mandatory attributes of the Uganda Refugee Data Attributes specification (plus a photo upload in Personal Identity) across a 9-tab Staff Portal UI.
 
 ---
 
@@ -8,7 +8,6 @@ A domain registry for refugee household and individual case management, built as
 
 | Register | Purpose | Parent | Functional ID Prefix | Fixed UUID |
 |---|---|---|---|---|
-| `Household` | `REGISTER` | — | `HH-` (10-digit) | `a0000000-0000-0000-0000-000000000001` |
 | `Refugee` | `REGISTER` | — | `RF-` (12-digit) | `a0000000-0000-0000-0000-000000000002` |
 | `IdentityDocument` | `TABLE` | `Refugee` | — | `a0000000-0000-0000-0000-000000000003` |
 | `SpecificNeeds` | `TABLE` | `Refugee` | — | `a0000000-0000-0000-0000-000000000005` |
@@ -18,7 +17,7 @@ A domain registry for refugee household and individual case management, built as
 | `EducationRecord` | `TABLE` | `Refugee` | — | `a0000000-0000-0000-0000-000000000008` |
 | `OccupationSkill` | `TABLE` | `Refugee` | — | `a0000000-0000-0000-0000-000000000009` |
 
-*(Only `Household`, `Refugee`, `IdentityDocument`, and `SpecificNeeds` are active in the UI; the remaining 5 legacy sub-registers are preserved in PostgreSQL and hidden from the UI.)*
+*(Only `Refugee`, `IdentityDocument`, and `SpecificNeeds` are active in the UI; the remaining 5 legacy sub-registers are preserved in PostgreSQL and hidden from the UI.)*
 
 ---
 
@@ -63,8 +62,8 @@ Requires only **Docker** (with Compose v2) and **git**.
 
 ## Data Model & Codelists
 
-- **Tab-by-Tab Data Model**: See [docs/DATA_MODEL.md](docs/DATA_MODEL.md) (8 Household category tabs; 10 Refugee category tabs).
-- **Codelists**: 32 JSON codelists in [data/codelists/refugee/](data/codelists/refugee/). Regenerate via:
+- **Tab-by-Tab Data Model**: See [docs/DATA_MODEL.md](docs/DATA_MODEL.md) (9 Refugee category tabs).
+- **Codelists**: 23 JSON codelists in [data/codelists/refugee/](data/codelists/refugee/). Regenerate via:
   ```bash
   python3 scripts/convert_uganda_codelists.py
   ```

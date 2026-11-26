@@ -19,23 +19,18 @@ from openg2p_registry_refugee_extension.register_domain.id_generator.g2p_id_gene
 from openg2p_registry_refugee_extension.register_domain.models.enums import (
     AddressTypeEnum,
     AuthResultEnum,
-    DeliveryMechanismEnum,
-    DeliveryModalityEnum,
     DocumentTypeEnum,
     DuplicateCheckEnum,
     ExitReasonEnum,
     HighestEducationLevelEnum,
-    IncomeSourceEnum,
     IssuerTypeEnum,
     LegalStatusEnum,
     NeedCategoryEnum,
     NeedSeverityEnum,
-    PaymentStatusEnum,
     PresenceStatusEnum,
     RefugeeGenderEnum,
     RefugeeMaritalStatusEnum,
     RefugeeRecordStatusEnum,
-    RelationshipToGroupEnum,
     RelativeRelationshipEnum,
     ReligionEnum,
     SecurityScreeningEnum,
@@ -71,7 +66,7 @@ def _codes(data: dict) -> set[str]:
 def _parse_section_schemas() -> list[tuple[str, str, dict]]:
     sql = (META_DIR / "g2p_register_sections.sql").read_text(encoding="utf-8")
     pattern = re.compile(
-        r"\('([a-f0-9-]+)','([^']+)','([a-f0-9-]+)',[^,]+,[^,]+,[^,]+,[^,]+,\d+,[^,]+,\d+,'(\{.*?\})'",
+        r"\('([a-f0-9-]+)','([^']+)','([a-f0-9-]+)','[^']+','[^']+','[^']*',[^,]+,\d+,[^,]+,\d+,'(\{.*?\})'",
         re.DOTALL,
     )
     rows = []
@@ -95,6 +90,7 @@ def _iter_widgets(obj):
 
 class MetadataConsistencyTests(unittest.TestCase):
     def test_every_register_has_models_schemas_and_service(self):
+        self.assertNotIn("Household", REGISTER_IDS)
         for name, reg_id in REGISTER_IDS.items():
             self.assertTrue(hasattr(models, f"G2PRegister{name}"), f"Missing model G2PRegister{name}")
             self.assertTrue(hasattr(models, f"G2PRegisterHistory{name}"))
@@ -174,7 +170,6 @@ class MetadataConsistencyTests(unittest.TestCase):
             "LEGAL_STATUS": LegalStatusEnum,
             "REFUGEE_GENDER": RefugeeGenderEnum,
             "REFUGEE_MARITAL_STATUS": RefugeeMaritalStatusEnum,
-            "REFUGEE_RELATIONSHIP_TO_GROUP": RelationshipToGroupEnum,
             "RELATIONSHIP_TO_HEAD": RelativeRelationshipEnum,
             "EDUCATION_LEVEL": HighestEducationLevelEnum,
             "RELIGION": ReligionEnum,
@@ -187,11 +182,7 @@ class MetadataConsistencyTests(unittest.TestCase):
             "SECURITY_SCREENING": SecurityScreeningEnum,
             "UNACCOMPANIED_CHILD": UnaccompaniedChildEnum,
             "WASHINGTON_GROUP_ANSWER": WashingtonGroupAnswerEnum,
-            "INCOME_SOURCE": IncomeSourceEnum,
-            "DELIVERY_MODALITY": DeliveryModalityEnum,
-            "DELIVERY_MECHANISM": DeliveryMechanismEnum,
             "AUTH_RESULT": AuthResultEnum,
-            "PAYMENT_STATUS": PaymentStatusEnum,
             "REFUGEE_RECORD_STATUS": RefugeeRecordStatusEnum,
             "DUPLICATE_CHECK": DuplicateCheckEnum,
             "EXIT_REASON": ExitReasonEnum,
@@ -204,7 +195,6 @@ class MetadataConsistencyTests(unittest.TestCase):
                 _codes(codelists[attr_id]),
                 f"Enum {enum_cls.__name__} does not match codelist {attr_id}",
             )
-        self.assertIn("HEAD", _codes(codelists["REFUGEE_RELATIONSHIP_TO_GROUP"]))
 
     def test_refugee_codelists_integrity(self):
         codelists = _load_codelists()
@@ -228,8 +218,21 @@ class MetadataConsistencyTests(unittest.TestCase):
     def test_negative_broken_binding_fails(self):
         codelists = _load_codelists()
         self.assertNotIn("NON_EXISTENT_UGANDA_CODELIST", codelists)
-        hh_cols = {c.name for c in models.G2PRegisterHousehold.__table__.columns}
-        self.assertNotIn("non_existent_column_xyz", hh_cols)
+        rf_cols = {c.name for c in models.G2PRegisterRefugee.__table__.columns}
+        self.assertNotIn("non_existent_column_xyz", rf_cols)
+        self.assertNotIn("relationship_to_group", rf_cols)
+        self.assertIn("record_image_document_id", rf_cols)
+
+    def test_photo_widget_in_personal_identity(self):
+        sections = dict((sid, schema) for sid, _reg, schema in _parse_section_schemas())
+        pi = sections["refugee_personal_info_section_01"]
+        photo_widgets = [
+            w for w in _iter_widgets(pi)
+            if w.get("widget-data-path") == f"{REGISTER_IDS['Refugee']}.record_image_document_id"
+        ]
+        self.assertEqual(len(photo_widgets), 1)
+        self.assertEqual(photo_widgets[0]["widget"], "file")
+        self.assertEqual(photo_widgets[0]["widget-label"], "photo")
 
     def test_every_metadata_insert_has_on_conflict(self):
         sql_files = sorted(META_DIR.glob("*.sql"))
@@ -243,11 +246,9 @@ class MetadataConsistencyTests(unittest.TestCase):
                     f"{sql_file.name} is missing ON CONFLICT",
                 )
 
-    def test_id_generator_branches_on_lowercase_household_and_refugee(self):
+    def test_id_generator_branches_on_lowercase_refugee(self):
         gen = G2PIdGeneratorService()
         dummy_reg = MagicMock()
-        self.assertEqual(gen.generate_prefix_suffix(dummy_reg, "Household").prefix, "HH-")
-        self.assertEqual(gen.generate_prefix_suffix(dummy_reg, "household").prefix, "HH-")
         self.assertEqual(gen.generate_prefix_suffix(dummy_reg, "Refugee").prefix, "RF-")
         self.assertEqual(gen.generate_prefix_suffix(dummy_reg, "refugee").prefix, "RF-")
         self.assertEqual(gen.generate_prefix_suffix(dummy_reg, "Address").prefix, "DEFAULT-")

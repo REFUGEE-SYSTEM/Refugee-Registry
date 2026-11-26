@@ -19,7 +19,6 @@ from ..models.enums import (
     LegalStatusEnum,
     PresenceStatusEnum,
     RefugeeRecordStatusEnum,
-    RelationshipToGroupEnum,
     ReligionEnum,
     SecurityScreeningEnum,
     UnaccompaniedChildEnum,
@@ -29,7 +28,6 @@ from .geo_address_lines import G2PGeoAddressLinesSchema
 
 
 class G2PSchemaRefugee:
-    relationship_to_group: Optional[RelationshipToGroupEnum] = None
     country_of_origin: Optional[str] = None
     fathers_name: Optional[str] = None
     mothers_name: Optional[str] = None

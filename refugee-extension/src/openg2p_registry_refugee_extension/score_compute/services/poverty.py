@@ -10,8 +10,8 @@ _logger = logging.getLogger(__name__)
 
 class G2PScoreComputeServicePoverty(G2PScoreComputeInterface):
     """
-    Weighted-sum poverty-style score on household attributes configured in
-    `g2p_register_score_definitions` (e.g. `size_total`, `size_children_u5`).
+    Weighted-sum poverty-style score on record attributes configured in
+    `g2p_register_score_definitions`.
     """
 
     @staticmethod
@@ -47,7 +47,7 @@ class G2PScoreComputeServicePoverty(G2PScoreComputeInterface):
             score += self._to_number(contributing_attribute_values.get(key)) * w
 
         _logger.info(
-            "Computed POVERTY score %.4f for household %s (attributes=%s)",
+            "Computed POVERTY score %.4f for record %s (attributes=%s)",
             round(score, 4),
             link_internal_record_id,
             sorted(contributing_attribute_values.keys()),

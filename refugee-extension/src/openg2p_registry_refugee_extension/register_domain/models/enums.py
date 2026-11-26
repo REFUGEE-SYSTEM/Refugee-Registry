@@ -13,22 +13,6 @@ class LegalStatusEnum(StrEnum):
     HOST_COMMUNITY = "HOST_COMMUNITY"
 
 
-class RelationshipToGroupEnum(StrEnum):
-    """Mirrors refugee domain's REFUGEE_RELATIONSHIP_TO_GROUP codelist (Uganda)."""
-
-    HEAD = "HEAD"
-    SPOUSE = "SPOUSE"
-    SON_DAUGHTER = "SON_DAUGHTER"
-    STEPCHILD = "STEPCHILD"
-    PARENT = "PARENT"
-    SIBLING = "SIBLING"
-    GRANDCHILD = "GRANDCHILD"
-    NIECE_NEPHEW = "NIECE_NEPHEW"
-    OTHER_RELATIVE = "OTHER_RELATIVE"
-    FOSTER_CHILD = "FOSTER_CHILD"
-    UNRELATED = "UNRELATED"
-
-
 class RelativeRelationshipEnum(StrEnum):
     """Mirrors Master Data's RELATIONSHIP_TO_HEAD codelist (for legacy Relative table)."""
 
@@ -189,36 +173,6 @@ class WashingtonGroupAnswerEnum(StrEnum):
     CANNOT_DO_AT_ALL = "CANNOT_DO_AT_ALL"
 
 
-class IncomeSourceEnum(StrEnum):
-    """Mirrors refugee domain's INCOME_SOURCE codelist (Uganda L01)."""
-
-    FARMING = "FARMING"
-    CASUAL_LABOUR = "CASUAL_LABOUR"
-    BUSINESS = "BUSINESS"
-    SALARY = "SALARY"
-    REMITTANCES = "REMITTANCES"
-    AID_ONLY = "AID_ONLY"
-    NONE = "NONE"
-
-
-class DeliveryModalityEnum(StrEnum):
-    """Mirrors refugee domain's DELIVERY_MODALITY codelist (Uganda N01)."""
-
-    CASH = "CASH"
-    IN_KIND_FOOD = "IN_KIND_FOOD"
-    VOUCHER = "VOUCHER"
-    MIXED = "MIXED"
-
-
-class DeliveryMechanismEnum(StrEnum):
-    """Mirrors refugee domain's DELIVERY_MECHANISM codelist (Uganda Code Lists)."""
-
-    MOBILE_MONEY = "MOBILE_MONEY"
-    AGENCY_BANKING = "AGENCY_BANKING"
-    CASH_IN_HAND = "CASH_IN_HAND"
-    IN_KIND_FOOD = "IN_KIND_FOOD"
-
-
 class AuthResultEnum(StrEnum):
     """Mirrors refugee domain's AUTH_RESULT codelist (Uganda O02)."""
 
@@ -226,17 +180,6 @@ class AuthResultEnum(StrEnum):
     IRIS_OK = "IRIS_OK"
     MANUAL_OVERRIDE = "MANUAL_OVERRIDE"
     FAILED = "FAILED"
-
-
-class PaymentStatusEnum(StrEnum):
-    """Mirrors refugee domain's PAYMENT_STATUS codelist (Uganda O03)."""
-
-    SENT = "SENT"
-    CREDITED = "CREDITED"
-    COLLECTED = "COLLECTED"
-    FAILED = "FAILED"
-    REVERSED = "REVERSED"
-    NOT_COLLECTED = "NOT_COLLECTED"
 
 
 class RefugeeRecordStatusEnum(StrEnum):

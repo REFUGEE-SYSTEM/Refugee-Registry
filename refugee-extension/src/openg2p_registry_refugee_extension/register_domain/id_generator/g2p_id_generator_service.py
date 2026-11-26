@@ -9,8 +9,6 @@ class G2PIdGeneratorService(BaseService, G2PIdGeneratorInterface):
     ) -> IdAffix:
         mnemonic = (register_mnemonic or "").lower()
 
-        if mnemonic == "household":
-            return IdAffix(prefix="HH-", suffix="")
         if mnemonic == "refugee":
             return IdAffix(prefix="RF-", suffix="")
 

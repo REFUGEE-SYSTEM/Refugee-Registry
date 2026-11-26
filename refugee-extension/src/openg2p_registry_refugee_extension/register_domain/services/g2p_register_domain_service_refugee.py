@@ -25,7 +25,6 @@ def _enum_fields() -> dict:
         RefugeeGenderEnum,
         RefugeeMaritalStatusEnum,
         RefugeeRecordStatusEnum,
-        RelationshipToGroupEnum,
         ReligionEnum,
         SecurityScreeningEnum,
         UnaccompaniedChildEnum,
@@ -35,7 +34,6 @@ def _enum_fields() -> dict:
     return {
         "gender": RefugeeGenderEnum,
         "marital_status": RefugeeMaritalStatusEnum,
-        "relationship_to_group": RelationshipToGroupEnum,
         "highest_education_level": HighestEducationLevelEnum,
         "religion": ReligionEnum,
         "legal_status": LegalStatusEnum,
@@ -108,7 +106,6 @@ class G2PRegisterDomainServiceRefugee(G2PRegisterDomainService):
             "country_of_origin",
             "nationality",
             "marital_status",
-            "relationship_to_group",
             "legal_status",
             "security_screening_status",
             "presence_status",

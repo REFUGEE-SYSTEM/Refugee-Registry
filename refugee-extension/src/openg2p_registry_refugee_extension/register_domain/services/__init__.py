@@ -5,7 +5,6 @@ from .g2p_register_domain_service_displacement_history import (
 from .g2p_register_domain_service_education_record import (
     G2PRegisterDomainServiceEducationRecord,
 )
-from .g2p_register_domain_service_household import G2PRegisterDomainServiceHousehold
 from .g2p_register_domain_service_identity_document import (
     G2PRegisterDomainServiceIdentityDocument,
 )

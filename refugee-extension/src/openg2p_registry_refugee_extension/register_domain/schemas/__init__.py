@@ -13,11 +13,6 @@ from .education_record import (
     G2PRegisterHistorySchemaEducationRecord,
     G2PRegisterSchemaEducationRecord,
 )
-from .household import (
-    G2PIntakeFormSchemaHousehold,
-    G2PRegisterHistorySchemaHousehold,
-    G2PRegisterSchemaHousehold,
-)
 from .identity_document import (
     G2PIntakeFormSchemaIdentityDocument,
     G2PRegisterHistorySchemaIdentityDocument,

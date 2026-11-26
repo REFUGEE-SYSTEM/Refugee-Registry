@@ -16,7 +16,6 @@ from .register_domain.models import (
     G2PIntakeFormAddress,
     G2PIntakeFormDisplacementHistory,
     G2PIntakeFormEducationRecord,
-    G2PIntakeFormHousehold,
     G2PIntakeFormIdentityDocument,
     G2PIntakeFormOccupationSkill,
     G2PIntakeFormRefugee,
@@ -28,13 +27,11 @@ from .register_domain.models import (
     G2PRegisterHistoryAddress,
     G2PRegisterHistoryDisplacementHistory,
     G2PRegisterHistoryEducationRecord,
-    G2PRegisterHistoryHousehold,
     G2PRegisterHistoryIdentityDocument,
     G2PRegisterHistoryOccupationSkill,
     G2PRegisterHistoryRefugee,
     G2PRegisterHistoryRelative,
     G2PRegisterHistorySpecificNeeds,
-    G2PRegisterHousehold,
     G2PRegisterIdentityDocument,
     G2PRegisterOccupationSkill,
     G2PRegisterRefugee,
@@ -45,7 +42,6 @@ from .register_domain.services import (
     G2PRegisterDomainServiceAddress,
     G2PRegisterDomainServiceDisplacementHistory,
     G2PRegisterDomainServiceEducationRecord,
-    G2PRegisterDomainServiceHousehold,
     G2PRegisterDomainServiceIdentityDocument,
     G2PRegisterDomainServiceOccupationSkill,
     G2PRegisterDomainServiceRefugee,
@@ -100,7 +96,6 @@ class Initializer(BaseInitializer):
         super().initialize()
         CoreInitializer().initialize()
 
-        G2PRegisterDomainServiceHousehold()
         G2PRegisterDomainServiceRefugee()
         G2PRegisterDomainServiceIdentityDocument()
         G2PRegisterDomainServiceDisplacementHistory()
@@ -115,9 +110,6 @@ class Initializer(BaseInitializer):
             _logger.info("Migrating refugee extension database")
 
             for model in (
-                G2PRegisterHousehold,
-                G2PRegisterHistoryHousehold,
-                G2PIntakeFormHousehold,
                 G2PRegisterRefugee,
                 G2PRegisterHistoryRefugee,
                 G2PIntakeFormRefugee,

@@ -22,7 +22,6 @@ from .enums import (
     LegalStatusEnum,
     PresenceStatusEnum,
     RefugeeRecordStatusEnum,
-    RelationshipToGroupEnum,
     ReligionEnum,
     SecurityScreeningEnum,
     UnaccompaniedChildEnum,
@@ -37,9 +36,6 @@ class G2PRefugee:
     """Domain attributes for Refugee individual (Uganda mandatory model + preserved legacy columns)."""
 
     # Legacy columns (preserved, never dropped)
-    relationship_to_group: Mapped[RelationshipToGroupEnum] = mapped_column(
-        String, nullable=True
-    )  # F02
     country_of_origin: Mapped[str] = mapped_column(String, nullable=True)  # B08
     fathers_name: Mapped[str] = mapped_column(String, nullable=True)
     mothers_name: Mapped[str] = mapped_column(String, nullable=True)

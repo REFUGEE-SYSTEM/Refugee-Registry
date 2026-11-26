@@ -62,9 +62,7 @@ else
 fi
 
 # 2. ID Generator allocation test
-hh_id="$(curl -s -X POST "http://localhost:${REFUGEE_IDGEN_PORT:-8240}/v1/idgenerator/household/id" | python3 -c "import sys,json; d=json.load(sys.stdin); print((d.get('response') or {}).get('id') or d.get('id',''))" 2>/dev/null || true)"
 rf_id="$(curl -s -X POST "http://localhost:${REFUGEE_IDGEN_PORT:-8240}/v1/idgenerator/refugee/id" | python3 -c "import sys,json; d=json.load(sys.stdin); print((d.get('response') or {}).get('id') or d.get('id',''))" 2>/dev/null || true)"
-[[ ${#hh_id} -eq 10 ]] && pass "IDGen household ID allocated: $hh_id" || fail "IDGen household ID invalid: '$hh_id'"
 [[ ${#rf_id} -eq 12 ]] && pass "IDGen refugee ID allocated: $rf_id" || fail "IDGen refugee ID invalid: '$rf_id'"
 
 # 3. DB verification (IAM, MDS, Registry)
@@ -75,13 +73,14 @@ docker compose exec -T postgres psql -U "${POSTGRES_USER:-postgres}" -d iam_staf
 geo_cnt="$(docker compose exec -T postgres psql -U "${POSTGRES_USER:-postgres}" -d "${REFUGEE_MASTER_DATA_DB:-refugee_master_data_db}" -tAc "SELECT COUNT(*) FROM g2p_geo_levels")"
 [[ "${geo_cnt:-0}" -gt 0 ]] && pass "MDS g2p_geo_levels count=$geo_cnt" || fail "MDS geo levels empty"
 
+hh_reg_cnt="$(docker compose exec -T postgres psql -U "${POSTGRES_USER:-postgres}" -d "${REFUGEE_REGISTRY_DB:-refugee_registry_db}" -tAc "SELECT COUNT(*) FROM g2p_register_definitions WHERE LOWER(register_mnemonic) = 'household'")"
+[[ "${hh_reg_cnt:-1}" -eq 0 ]] && pass "No Household register in g2p_register_definitions" || fail "Unexpected Household register count=$hh_reg_cnt"
+
 tab_cnt="$(docker compose exec -T postgres psql -U "${POSTGRES_USER:-postgres}" -d "${REFUGEE_REGISTRY_DB:-refugee_registry_db}" -tAc "SELECT COUNT(*) FROM g2p_register_ui_tabs WHERE is_active = true")"
-[[ "${tab_cnt:-0}" -ge 10 ]] && pass "Registry active UI tabs count=$tab_cnt" || fail "Registry UI tabs unexpected: $tab_cnt"
+[[ "${tab_cnt:-0}" -eq 9 ]] && pass "Registry active UI tabs count=$tab_cnt" || fail "Registry UI tabs unexpected: $tab_cnt"
 
 if [[ "${LOAD_SAMPLE_DATA:-true}" == "true" ]]; then
-  hh_cnt="$(docker compose exec -T postgres psql -U "${POSTGRES_USER:-postgres}" -d "${REFUGEE_REGISTRY_DB:-refugee_registry_db}" -tAc "SELECT COUNT(*) FROM g2p_register_households")"
   rf_cnt="$(docker compose exec -T postgres psql -U "${POSTGRES_USER:-postgres}" -d "${REFUGEE_REGISTRY_DB:-refugee_registry_db}" -tAc "SELECT COUNT(*) FROM g2p_register_refugees")"
-  [[ "${hh_cnt:-0}" -ge 8 ]] && pass "Demo households count=$hh_cnt" || fail "Demo households missing: $hh_cnt"
   [[ "${rf_cnt:-0}" -ge 25 ]] && pass "Demo refugees count=$rf_cnt" || fail "Demo refugees missing: $rf_cnt"
 fi
 

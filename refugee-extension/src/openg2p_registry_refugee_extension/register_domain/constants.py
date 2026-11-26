@@ -5,7 +5,6 @@ Every metadata SQL file (register definitions, sections, schemas, tabs,
 intake forms) references these exact UUIDs.
 
 Register Map:
-- Household:           a0000000-0000-0000-0000-000000000001  (REGISTER, master=NULL, mints functional ID)
 - Refugee:             a0000000-0000-0000-0000-000000000002  (REGISTER, master=NULL, mints functional ID)
 - IdentityDocument:    a0000000-0000-0000-0000-000000000003  (TABLE, master=Refugee)
 - DisplacementHistory: a0000000-0000-0000-0000-000000000004  (TABLE, master=Refugee)
@@ -17,7 +16,6 @@ Register Map:
 """
 
 REGISTER_IDS = {
-    "Household": "a0000000-0000-0000-0000-000000000001",
     "Refugee": "a0000000-0000-0000-0000-000000000002",
     "IdentityDocument": "a0000000-0000-0000-0000-000000000003",
     "DisplacementHistory": "a0000000-0000-0000-0000-000000000004",
