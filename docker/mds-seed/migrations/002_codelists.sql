@@ -71,6 +71,20 @@ CREATE TABLE IF NOT EXISTS g2p_attribute_values (
     PRIMARY KEY (attribute_id, value_id)
 );
 
+ALTER TABLE g2p_attributes ADD COLUMN IF NOT EXISTS display_name_i18n JSONB;
+ALTER TABLE g2p_attributes ADD COLUMN IF NOT EXISTS country VARCHAR;
+ALTER TABLE g2p_attributes ADD COLUMN IF NOT EXISTS version VARCHAR;
+ALTER TABLE g2p_attributes ADD COLUMN IF NOT EXISTS valid_from DATE;
+ALTER TABLE g2p_attributes ADD COLUMN IF NOT EXISTS valid_to DATE;
+
+ALTER TABLE g2p_attribute_values ADD COLUMN IF NOT EXISTS display_name_i18n JSONB;
+ALTER TABLE g2p_attribute_values ADD COLUMN IF NOT EXISTS roles JSONB;
+ALTER TABLE g2p_attribute_values ADD COLUMN IF NOT EXISTS domain VARCHAR;
+ALTER TABLE g2p_attribute_values ADD COLUMN IF NOT EXISTS country VARCHAR;
+ALTER TABLE g2p_attribute_values ADD COLUMN IF NOT EXISTS version VARCHAR;
+ALTER TABLE g2p_attribute_values ADD COLUMN IF NOT EXISTS valid_from DATE;
+ALTER TABLE g2p_attribute_values ADD COLUMN IF NOT EXISTS valid_to DATE;
+
 CREATE INDEX IF NOT EXISTS ix_g2p_attributes_code
     ON g2p_attributes (attribute_code);
 CREATE INDEX IF NOT EXISTS ix_g2p_attribute_values_attribute_id
