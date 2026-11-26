@@ -60,13 +60,33 @@ def _patch_minio_public_url() -> None:
         else:
             self._public_client = None
 
+    def _get_public_client(self):
+        client = getattr(self, "_public_client", None)
+        if client is not None:
+            return client
+        public_ep = os.environ.get("MINIO_PUBLIC_ENDPOINT", "").strip()
+        if not public_ep:
+            return None
+        public_ep = public_ep.removeprefix("http://").removeprefix("https://").rstrip("/")
+        creds = self.readonly_client._provider.retrieve()
+        secure = self.readonly_client._base_url.is_https
+        client = Minio(
+            endpoint=public_ep,
+            access_key=creds.access_key,
+            secret_key=creds.secret_key,
+            secure=secure,
+            region="us-east-1",
+        )
+        self._public_client = client
+        return client
+
     def patched_get_url(
         self,
         document_store_id: str,
         bucket,
         expires: timedelta = timedelta(hours=1),
     ) -> str:
-        client = getattr(self, "_public_client", None)
+        client = _get_public_client(self)
         if client is not None:
             return client.presigned_get_object(
                 bucket_name=bucket,
